@@ -1,3 +1,5 @@
+import {localTurnHandoff} from './local-turn-handoff.mjs';
+
 /** Two-player vertical slice: room/tactical rendering inspired by the 3.2.1
  * canvas, palette, isometric projection and ORIGINAL bundled character assets.
  * All position, HP and combat outcomes are authoritative WebSocket messages.
@@ -30,6 +32,8 @@ const seatIds=['one','two','three','four'].slice(0,localSeatCount);
 if($('modeLabel'))$('modeLabel').textContent=localMode?`LOCAL MULTIPLAYER · ${localSeatCount} PLAYER${localSeatCount===1?'':'S'}`:'ONLINE MULTIPLAYER · UP TO FOUR PLAYERS';
 let activeSeat='one';
 const seatSockets={},seatStates={},seatChats={};let setupSeat=null;
+let pendingLocalEndTurn=null;
+let pendingLocalCharacterSetup=null;
 const notices=[];let noticeTimer=null;
 function showNotice(title,body,kind='level'){
  const notice=$('milestoneNotice');const close=$('noticeClose');
@@ -154,11 +158,12 @@ function seatSelector(){
   const character=seatStates[id]?.players?.[id];
   const b=document.createElement('button');b.type='button';b.className='seat-button'+(activeSeat===id?' selected':'')+(!character?.nameConfirmed?' needs-setup':'');
   b.textContent=character?.nameConfirmed?character.name:`Player ${i+1}`;
-  b.addEventListener('click',()=>selectSeat(id));container.append(b);
+  b.addEventListener('click',()=>selectSeat(id,{manual:true}));container.append(b);
  }
 }
-function selectSeat(id){
+function selectSeat(id,{manual=false}={}){
  if(!seatIds.includes(id))return;
+ if(manual){pendingLocalEndTurn=null;pendingLocalCharacterSetup=null;}
  activeSeat=id;socket=seatSockets[id];state=seatStates[id]||null;me=state?.players?.[state.me]||null;
  selectedEnemyId=null;lastSeenEvent=null;setupSeat=null;
  chatData=seatChats[id]||{messages:[],muted:[],reports:[],adminMuted:false,playersMuted:[]};
@@ -179,14 +184,42 @@ function connectSeat(id){
    seatStates[id]=msg.state;
    if(!localMode||activeSeat===id){state=msg.state;me=state.players[state.me];if(me)consumeEvents(state,me);syncUI();renderChatControls()}
    seatSelector();
+   // After creating a character, offer the next unconfigured local seat.
+   // Only advance on the confirmed server snapshot, not just form submission.
+   if(localMode&&pendingLocalCharacterSetup){
+     const savedSeat=pendingLocalCharacterSetup;
+     // A second seat may connect *after* the character save acknowledgement.
+     // Re-check on each seat's state, but only after the saved seat is confirmed.
+     if(seatStates[savedSeat]?.players?.[savedSeat]?.nameConfirmed){
+       const next=seatIds.find(candidate=>candidate!==savedSeat&&seatStates[candidate]?.players?.[candidate]&&!seatStates[candidate].players[candidate].nameConfirmed);
+       if(next&&seatSockets[next]?.readyState===WebSocket.OPEN){
+         pendingLocalCharacterSetup=null;selectSeat(next);
+       }else if(seatIds.every(candidate=>seatStates[candidate]?.players?.[candidate]?.nameConfirmed))pendingLocalCharacterSetup=null;
+     }
+   }
+   // Switch the shared screen only after the authoritative server state says
+   // which local seat now owns the turn. Do not switch just on button click:
+   // an invalid/unreceived End Turn must leave the same player selected.
+   if(localMode&&pendingLocalEndTurn){
+     const handoff=localTurnHandoff(pendingLocalEndTurn,id,msg.state,seatIds);
+     if(handoff.status==='switch'){
+       const next=handoff.seat;
+       if(seatSockets[next]?.readyState===WebSocket.OPEN){
+         pendingLocalEndTurn=null;selectSeat(next);
+       }
+     }else if(handoff.status==='finished')pendingLocalEndTurn=null;
+   }
   }else if(msg.type==='chat-state'){
     seatChats[id]=msg;if(!localMode||activeSeat===id){chatData=msg;renderChat()}
   }else if(msg.type==='error'&&(!localMode||activeSeat===id)){
+    if(localMode&&pendingLocalEndTurn?.actor===id)pendingLocalEndTurn=null;
+    if(localMode&&pendingLocalCharacterSetup===id)pendingLocalCharacterSetup=null;
     const err=$('setupError');if(!($('characterOverlay').hidden)){err.textContent=msg.message;err.hidden=false}
     else toast(msg.message);
   }
  };
  ws.onclose=e=>{
+  if(localMode&&pendingLocalEndTurn?.actor===id)pendingLocalEndTurn=null;
   if(!localMode||activeSeat===id)setConnection('Disconnected · reconnecting',false);
   if(e.code===4000){if(!localMode)authClosed=true;if(!localMode||activeSeat===id)toast('This seat opened on another device.');return}
   setTimeout(()=>connectSeat(id),2200);
@@ -212,6 +245,7 @@ function updateCharacterSetup(){
 $('characterForm').addEventListener('submit',event=>{
  event.preventDefault();if(!me)return;
  $('setupError').hidden=true;
+ if(localMode)pendingLocalCharacterSetup=activeSeat;
  send({type:'character-create',name:$('characterName').value,klass:$('characterClass').value});
 });
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
@@ -787,8 +821,15 @@ function render(){if(!state||!me)return;const box=canvas.getBoundingClientRect()
 let lastFrame=0;function loop(t){if(t-lastFrame>120){render();lastFrame=t}requestAnimationFrame(loop)}
 for(const b of document.querySelectorAll('[data-dir]'))b.addEventListener('click',()=>requestMove(b.dataset.dir));
 $('rollMoveBtn').onclick=()=>send({type:'roll-move'});
-$('endTurnBtn').onclick=()=>send({type:'end-turn'});
-$('endTurnQuickBtn').onclick=()=>send({type:'end-turn'});
+function endTurnAndPassDevice(){
+  if(localMode&&seatIds.length>1&&state?.turn?.activePlayer===activeSeat&&
+     me?.lastRolledTurn===state.turn.round&&socket?.readyState===WebSocket.OPEN){
+    pendingLocalEndTurn={actor:activeSeat,round:state.turn.round,revision:state.revision};
+  }
+  send({type:'end-turn'});
+}
+$('endTurnBtn').onclick=endTurnAndPassDevice;
+$('endTurnQuickBtn').onclick=endTurnAndPassDevice;
 $('resumeQuestBtn').onclick=()=>send({type:'resume-quest'});
 $('returnCampBtn').onclick=()=>me?.room==='camp'?$('merchantPanel').scrollIntoView({behavior:'smooth',block:'start'}):send({type:'return-camp'});
 $('attackBtn').onclick=()=>send({type:'action',action:{type:'attack',target:selectedEnemyId||null}});
