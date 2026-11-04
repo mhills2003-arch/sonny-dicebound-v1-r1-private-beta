@@ -67,7 +67,10 @@ function consumeEvents(snapshot,player){
   if(event.type==='level-up'&&event.player===player.id)showNotice('LEVEL '+event.level+'!','HP +'+event.hpGain+' → '+event.hp+' · Attack +'+event.attackGain+' → D'+event.attack+' · Armour +'+event.armourGain+' → D'+event.armour,'level');
   if(event.type==='room-cleared'&&event.room===player.room)toast(event.name+' cleared!');
   if(event.type==='boss-wave'&&event.room===player.room)showNotice('SECOND WAVE!','A new boss emerges from the excavation. The battle is not over!','down');
-  if(event.type==='quest-complete'&&event.room===player.room)showNotice('QUEST '+event.quest+' COMPLETE!','Boss defeated · '+(event.next?'Quest '+event.next+' unlocked!':'The next adventure awaits.')+' Head to the east exit.','quest');
+  if(event.type==='quest-complete'&&event.room===player.room){
+    const tier=event.unlockedFor?.[player.id];
+    showNotice('QUEST '+event.quest+' COMPLETE!',`Boss defeated · ${tier?'All '+tier+' quests unlocked!':'Your quest progress has been saved.'} Head to the east exit.`,'quest');
+  }
   if(event.type==='rare-find'&&event.player===player.id)showNotice(event.rarity.toUpperCase()+' TREASURE!',event.item,'treasure');
   if(event.type==='return-camp'&&event.players?.includes(player.id))showNotice('WELCOME BACK!','Quest '+event.quest+' finished · merchant and new quests available at camp.','quest');
   if(event.type==='death'&&event.player===player.id)showNotice('DEFEATED','Returned to Level '+event.level+' · Lost '+event.goldLost+' gold'+(event.lost?' and '+event.lost:'')+'. Your journey continues.','down');
@@ -988,8 +991,9 @@ function renderCampaign(){
   const name=el('h3','',`${q.emoji} ${q.name}`);
   const unlocked=state?.unlockedQuest||1;
   const playable=q.number<=15;const accessible=playable&&q.number<=unlocked;
-  const alert=el('div',accessible?'quest-live':'quest-pending',accessible?'✓ PLAYABLE · '+(state?.completedQuests?.includes(q.number)?'COMPLETED · Return to quest':'Unlocked and ready'):'🔒 COMPLETE THE PREVIOUS QUEST TO UNLOCK');
-  detail.append(eyebrow,name,alert,el('p','muted',`${q.roomCount} original rooms. All 15 quests now have playable beta encounters.`));
+  const alert=el('div',accessible?'quest-live':'quest-pending',accessible?'✓ PLAYABLE · '+(state?.completedQuests?.includes(q.number)?'COMPLETED · Return to quest':'Unlocked and ready'):'🔒 COMPLETE ALL QUESTS IN THE PRECEDING DIFFICULTY TO UNLOCK');
+  const progress=state?.questTiers?.find(t=>t.name===q.difficulty);
+  detail.append(eyebrow,name,alert,el('p','muted',`${q.roomCount} original rooms. ${progress?`${progress.name}: ${progress.complete}/${progress.quests.length} completed. `:''}Complete every quest in a difficulty to unlock the whole next tier.`));
   if(playable){const completed=state?.completedQuests?.includes(q.number);const savedRoom=me?.questBookmarks?.[q.number]?.room;const launch=el('button','quest-launch',completed?'↻ Replay Quest '+q.number:savedRoom?'↩ Resume Quest '+q.number+' · '+roomDef(savedRoom).name:'▶ Enter Quest '+q.number);launch.type='button';launch.disabled=!connected||!accessible||!me||state?.turn?.activePlayer!==me.id||state?.rooms[me.room]?.battle.status==='active';launch.addEventListener('click',()=>{
     if(completed&&!confirm('Replay Quest '+q.number+'? This resets defeated enemies and personal treasure in that quest for everyone, but preserves levels, gold, equipment and other quests. All players must first leave this quest.'))return;
     send({type:completed?'replay-quest':'enter-quest',quest:q.number});toggleQuestBoard(false)});detail.append(launch);}
