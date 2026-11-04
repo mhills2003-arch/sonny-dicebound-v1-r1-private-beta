@@ -1,23 +1,23 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101e"><title>DICEBOUND · V1 Multiplayer Beta</title><link rel="stylesheet" href="./styles.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101e"><title>DICEBOUND · V1 Multiplayer Beta · R2 Controls</title><link rel="stylesheet" href="./styles.css"></head>
 <body>
 <div id="app">
   <header class="masthead">
-    <div class="brand"><span class="brand-icon">🎲</span><div><strong>DICEBOUND <span>V1</span></strong><small>V1 MULTIPLAYER · PRIVATE BETA</small></div></div>
+    <div class="brand"><span class="brand-icon">🎲</span><div><strong>DICEBOUND <span>V1</span></strong><small>V1 MULTIPLAYER · R2 UI &amp; CONTROLS</small></div></div>
     <div class="local-seats" id="localSeats" hidden aria-label="Local player selector"><span>Pass the device to</span><div id="seatButtons"></div></div>
     <div class="connection"><span class="status-dot" id="connectionDot"></span><span id="connectionText">Connecting…</span><a class="textbtn" href="./">Choose mode</a><button class="textbtn" id="logoutBtn" aria-label="Log out">Sign out</button></div>
   </header>
   <nav class="trial-mode"><span id="modeLabel">MULTIPLAYER PRIVATE BETA</span> · <a href="./">Choose game mode</a> <small>(Separate local and online save worlds; live V1 is untouched)</small></nav>
   <div class="workspace">
-    <aside class="sidebar side-left">
+    <aside class="sidebar side-left" id="searchSidebar" aria-label="Search, party and map panels">
       <section class="plate"><h2>YOUR ADVENTURERS</h2><div id="people" aria-live="polite">Connecting to the dungeon…</div></section>
       <section class="plate"><h2>SHARED QUEST MAP</h2><p class="muted">Exploration belongs to the team. Find the doorway at the east or west wall.</p><div id="roomMap"></div></section>
       <section class="plate campaign-promo"><h2>ORIGINAL CAMPAIGN</h2><p class="quest-count"><strong>15</strong> quests · <strong>133</strong> rooms</p><p class="muted">Recovered from the actual DICEBOUND 3.2.1 game. The full catalogue is available to inspect; the co-operative port is being built quest by quest.</p><button id="openQuestsSide" class="campaign-open">🗺 View quest chronicle</button></section><section class="plate smallprint"><h2>BUILD STATUS</h2><p>This is an <strong>adult-only development lab</strong>. Quests 1–15 are playable technical beta encounters (133 rooms); Extreme quests 13–15 add 45 distinct storm, darkness and final-trial rooms. Parental safeguards remain in development.</p></section>
     </aside>
     <main class="main-area">
-      <div class="room-heading"><div><span class="eyebrow" id="currentQuestLabel">QUEST 1 · A ROLL IN THE WOODS</span><h1 id="roomName">Woodland Path</h1><p id="roomSub">Awaiting shared dungeon state…</p></div><div class="room-actions"><button class="viewbtn quest-launch" id="openQuests" type="button">🗺 Quests (Q)</button><button class="viewbtn" id="returnCampBtn" type="button">🏕 Camp / Shop</button><button class="viewbtn resume-quest" id="resumeQuestBtn" type="button" hidden>↩ Return to quest</button><button class="viewbtn" id="toggleView" title="Switch between tactical and illustrated room views">▦ Tactical</button></div></div>
+      <div class="room-heading"><div><span class="eyebrow" id="currentQuestLabel">QUEST 1 · A ROLL IN THE WOODS</span><h1 id="roomName">Woodland Path</h1><p id="roomSub">Awaiting shared dungeon state…</p></div><div class="room-actions"><button class="viewbtn r2-search-trigger" id="searchDrawerToggle" type="button" aria-controls="searchSidebar" aria-expanded="false">🔎 Search &amp; party</button><button class="viewbtn quest-launch" id="openQuests" type="button">🗺 Quests (Q)</button><button class="viewbtn" id="inventoryShortcutBtn" type="button">🎒 Inventory (I)</button><button class="viewbtn" id="returnCampBtn" type="button">🏕 Camp / Shop</button><button class="viewbtn resume-quest" id="resumeQuestBtn" type="button" hidden>↩ Return to quest</button><button class="viewbtn" id="toggleView" title="Switch between tactical and illustrated room views">▦ Tactical</button></div></div>
       <section class="hero-hud" id="heroHud" aria-label="Your character statistics">
-        <div class="hero-hud-title"><div><span class="hud-eyebrow">YOUR CHARACTER</span><strong id="heroName">Connecting…</strong><span id="heroClass" class="hud-muted">—</span></div><span class="hero-level" id="heroLevel">Level —</span></div>
+        <div class="hero-hud-title"><img id="heroPortrait" class="r2-hero-portrait" src="./assets/class-pieces/knight.png" alt="Selected adventurer class"><div><span class="hud-eyebrow">YOUR CHARACTER</span><strong id="heroName">Connecting…</strong><span id="heroClass" class="hud-muted">—</span></div><span class="hero-level" id="heroLevel">Level —</span></div>
         <div class="hud-bars">
           <div class="hud-meter"><div class="hud-meter-label"><span>❤ HEALTH</span><strong id="heroHp">— / —</strong></div><div class="hud-track"><span class="hud-fill hp" id="heroHpFill"></span></div></div>
           <div class="hud-meter"><div class="hud-meter-label"><span>✦ LEVEL PROGRESS</span><strong id="heroXp">— / — XP</strong></div><div class="hud-track"><span class="hud-fill xp" id="heroXpFill"></span></div></div>
@@ -42,28 +42,30 @@
           <div id="turnBanner" class="turn-banner" hidden></div>
           <div class="turn-dock-help">Everyone takes one turn. Enemies go last.</div>
         </aside>
-        <div class="canvas-wrap" id="canvasWrap"><canvas id="gameCanvas" role="img" aria-label="DICEBOUND tactical dungeon; use the directional buttons or arrow keys to move"></canvas><div class="canvas-help">Arrows, WASD or touch pad to move · Tap a foe to target</div></div>
+        <div class="canvas-wrap" id="canvasWrap"><canvas id="gameCanvas" role="img" aria-label="DICEBOUND tactical dungeon; use the directional buttons or arrow keys to move"></canvas><div class="canvas-help">Arrow keys or touch pad to move · Tap a foe to target</div></div>
         <aside class="action-dock" aria-label="Your turn action buttons">
           <strong class="action-dock-title">🎲 YOUR ACTIONS</strong>
-          <button id="rollMoveBtn" type="button" class="dock-roll">🎲 Roll Dice</button>
+          <button id="rollMoveBtn" type="button" class="dock-roll">🎲 Roll Dice (R)</button>
           <strong id="moveCounter" class="dock-counter">🎲 Roll once per turn</strong>
           <div class="combat-controls" aria-label="Combat actions">
-            <button id="attackBtn" class="combat-btn attack">⚔ Attack</button>
+            <button id="attackBtn" class="combat-btn attack">⚔ Attack (A)</button>
             <button id="potionBtn" class="combat-btn potion">🧪 Heal Me</button>
             <button id="potionAllyBtn" class="combat-btn potion">🧪 Heal Ally</button>
             <button id="specialBtn" class="combat-btn special">★ Special</button>
-            <button id="defendBtn" class="combat-btn">🛡 Defend</button>
+            <button id="defendBtn" class="combat-btn">🛡 Fortify (F)</button>
             <button id="reviveBtn" class="combat-btn">♥ Revive</button>
-            <button id="nestBtn" class="combat-btn" hidden>💠 Disable Nest · N</button><button id="lanternBtn" class="combat-btn" hidden>🏮 Light Lantern · L</button>
+            <button id="nestBtn" class="combat-btn" hidden>💠 Disable Nest · N</button><button id="lanternBtn" class="combat-btn" hidden>🏮 Light Lantern · Items</button>
           </div>
+          <button type="button" id="itemsMenuBtn" class="combat-btn r2-items-btn" aria-controls="itemsDrawer" aria-expanded="false">🧪 Items (P)</button>
           <button type="button" id="endTurnQuickBtn" class="end-turn-overlay" disabled>✓ END TURN</button>
         </aside>
       </div>
+      <div class="r2-items-drawer" id="itemsDrawer" hidden aria-label="Items and abilities"><div class="r2-drawer-head"><strong>🧪 Potions &amp; abilities</strong><button id="itemsCloseBtn" type="button" aria-label="Close items menu">✕</button></div><div id="itemsActions" class="r2-items-actions"></div><button id="r2BackpackBtn" type="button" class="combat-btn">🎒 Backpack &amp; equipment (I)</button><button id="r2CombatSuppliesBtn" type="button" class="combat-btn">💣 Combat supplies</button></div>
       <div class="target-panel" id="selectedTarget">Target: nearest enemy · tap a foe to choose</div>
-      <div class="movement-roll"><span>One D6 roll per player turn. End Turn passes to the next adventurer; enemies act last.</span></div>
+      <div class="movement-roll"><span>Arrow keys move · R Roll · A Attack · F Fortify · S Special · P Items · E End Turn</span></div>
       <div class="controls">
         <div class="dpad" aria-label="Movement controls"><button data-dir="N" aria-label="Move north">▲</button><div><button data-dir="W" aria-label="Move west">◀</button><button data-dir="S" aria-label="Move south">▼</button><button data-dir="E" aria-label="Move east">▶</button></div></div>
-        <div class="toolhint"><span id="actionHint">Roll D6 movement and spend the steps.</span><small>Roll, move up to your allowance, optionally attack, heal, defend or revive, then press End Turn. Enemies act after all players finish.</small></div>
+        <div class="toolhint"><span id="actionHint">Roll D6 movement and spend the steps.</span><small>Roll, move up to your allowance, optionally attack, heal, fortify or revive, then press End Turn. Enemies act after all players finish.</small></div>
         <button id="endTurnBtn" type="button" hidden tabindex="-1" aria-hidden="true">Legacy End Turn</button>
       </div>
     </main>
@@ -91,7 +93,7 @@
       </section>
       <section class="plate" id="questRewardPanel" hidden><h2>🏆 VICTORY CHEST</h2><p class="muted">Choose one equipment reward. The chest cannot be rerolled.</p><div id="questRewardChoices"></div></section><section class="plate" id="merchantPanel" hidden><h2>🪙 CAMP MERCHANT</h2><p class="muted">Buy potions, bombs, wards, meteors, superstrength and gear. Medium: Legendary offers are rare; Hard: occasional Mythic; Extreme: Legendary/Mythic stock plus a 5% chance of one Exotic offer after a qualifying boss.</p><div id="merchantStock"></div><h3 class="merchant-sell-heading">SELL ITEMS TO MERCHANT</h3><p class="muted">Buyback values are shown below. Selling permanently removes the item, including any bound enchantments.</p><div id="merchantSell"></div></section>
       <section class="plate adventurelog"><h2>ADVENTURE LOG</h2><div id="log" role="log" aria-live="polite">Your adventure will appear here…</div></section>
-      <section class="plate instructions"><h2>QUICK CONTROLS</h2><p><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or WASD: move</p><p><kbd>Space</kbd> Attack · <kbd>F</kbd> Defend · <kbd>R</kbd> Revive · <kbd>N</kbd> Disable adjacent Warrens nest · <kbd>L</kbd> Light an adjacent Abyss lantern</p><p class="muted">Separate browser sessions with individual adult-test invitation codes simulate co-operative tablets.</p></section>
+      <section class="plate instructions"><h2>QUICK CONTROLS</h2><p><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>: move</p><p><kbd>R</kbd> Roll · <kbd>E</kbd> End Turn · <kbd>A</kbd> Attack · <kbd>F</kbd> Fortify · <kbd>S</kbd> Special · <kbd>P</kbd> Items · <kbd>I</kbd> Inventory · <kbd>L</kbd> Log · <kbd>Q</kbd> Quests · <kbd>N</kbd> Nest · Lantern under Items</p><p class="muted">Separate browser sessions with individual adult-test invitation codes simulate co-operative tablets.</p></section>
     </aside>
   </div>
   <button id="chatLauncher" class="chat-launcher" type="button" aria-expanded="false" aria-controls="chatDrawer">💬 Chat <span id="chatUnread" class="chat-unread" hidden>New</span></button>
@@ -116,6 +118,7 @@
         <option value="warlock">🔮 Warlock · staff and magic</option>
         <option value="tinker">⚙ Tinker · devices and enchantments</option>
       </select>
+      <div class="r2-class-preview"><img id="classPreview" src="./assets/class-pieces/knight.png" alt="Knight class game piece"><span>Four distinct pieces — your chosen class determines your piece. A separate P1–P4 ring identifies the player.</span></div>
       <p class="class-permanent">Class selection is permanent. Choose carefully.</p>
       <button type="submit">Create adventurer</button>
       <div id="setupError" role="alert" class="setup-error" hidden></div>

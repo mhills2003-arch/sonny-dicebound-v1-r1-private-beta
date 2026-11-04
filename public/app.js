@@ -1,11 +1,12 @@
 import {localTurnHandoff} from './local-turn-handoff.mjs';
+import {resolveHotkey, R2_HOTKEYS} from './hotkeys.mjs';
 
 /** Two-player vertical slice: room/tactical rendering inspired by the 3.2.1
  * canvas, palette, isometric projection and ORIGINAL bundled character assets.
  * All position, HP and combat outcomes are authoritative WebSocket messages.
  */
 const ROOT = new URL('.',import.meta.url).pathname.replace(/\/$/,'');
-const CLIENT_BUILD='ENDGAME MAZE · SIX BOSSES · PHASED COMBAT';
+const CLIENT_BUILD='R2 UI · HOTKEYS · FOUR CLASS PIECES';
 const $ = id => document.getElementById(id);
 const canvas = $('gameCanvas');
 const ctx=canvas.getContext('2d');
@@ -13,7 +14,7 @@ const ctx=canvas.getContext('2d');
 const betaTitle=document.querySelector('.brand small');
 if(betaTitle)betaTitle.append(document.createTextNode(' · '+CLIENT_BUILD));
 const RES={tx:42,ty:23,zh:43}; // original DICEBOUND 3.2.1 projection
-const paths={one:'./assets/gary.png',two:'./assets/outlaw.png',three:'./assets/gary.png',four:'./assets/outlaw.png',d8:'./assets/d8.png',wallface:'./assets/wallface.jpeg',wallcap:'./assets/wallcap.jpeg'};
+const paths={knight:'./assets/class-pieces/knight.png',outlaw:'./assets/class-pieces/outlaw.png',warlock:'./assets/class-pieces/warlock.png',tinker:'./assets/class-pieces/tinker.png',d8:'./assets/d8.png',wallface:'./assets/wallface.jpeg',wallcap:'./assets/wallcap.jpeg'};
 const images={};for(const [key,path] of Object.entries(paths)){const image=new Image();image.src=path;images[key]=image}
 const ROOM_DATA={woodland:{name:'Woodland Path',left:null,right:'clearing'},clearing:{name:'Training Clearing',left:'woodland',right:'watchpost'},watchpost:{name:'Old Watchpost',left:'clearing',right:null}};
 const roomDef=id=>state?.roomDefinitions?.[id]||ROOM_DATA[id]||{name:'Unknown room',left:null,right:null,quest:1};
@@ -237,11 +238,18 @@ function updateCharacterSetup(){
  if(setupSeat!==me.id){
   setupSeat=me.id;$('setupError').hidden=true;$('characterName').value=me.nameConfirmed?me.name:'';
   $('characterClass').value=me.klass||'knight';
+  updateClassPiecePreview();
   $('characterClass').disabled=!!me.classChosen;
   $('characterName').disabled=!!me.nameConfirmed;
   $('characterName').placeholder=localMode?'Name for Player '+(seatIds.indexOf(me.id)+1):'Name your adventurer';
  }
 }
+function updateClassPiecePreview(){
+  const klass=$('characterClass').value;
+  $('classPreview').src=paths[klass]||paths.knight;
+  $('classPreview').alt=(klass.charAt(0).toUpperCase()+klass.slice(1))+' class game piece';
+}
+$('characterClass').addEventListener('change',updateClassPiecePreview);
 $('characterForm').addEventListener('submit',event=>{
  event.preventDefault();if(!me)return;
  $('setupError').hidden=true;
@@ -275,10 +283,10 @@ function syncUI(){if(!state||!me)return;
   $('roomSub').textContent=me.room==='camp'?'ADVENTURERS’ CAMP · Merchant, quests and resting place':
     `QUEST ${room.quest||1} · ${room.challenge||room.subtitle||'Explore the adventure'}${room.quest>=5?' · '+roomSize(me.room).width+'×'+roomSize(me.room).height+' maze · '+battle.enemies.filter(e=>e.hp>0).length+' foes remaining':''}`;
   const help=document.querySelector('.canvas-help');
-  if(help)help.textContent=room.quest>=5?roomSize(me.room).width+'×'+roomSize(me.room).height+' maze · S Swift · R Ranged · A Armoured · Z Zombie · G Ghost · T Teleporter · C Cloner · H Healer · N Ninja · Tap a foe to target':'Arrows, WASD or touch pad to move · Tap a foe to target';
+  if(help)help.textContent=room.quest>=5?roomSize(me.room).width+'×'+roomSize(me.room).height+' maze · S Swift · R Ranged · A Armoured · Z Zombie · G Ghost · T Teleporter · C Cloner · H Healer · N Ninja · Tap a foe to target':'Arrow keys or touch pad to move · Tap a foe to target';
   const list=$('people');list.replaceChildren();
   for(const p of Object.values(state.players)){
-    const wrap=el('div','player'+(p.id===state.me?' me':''));const pic=el('img','portrait');pic.src=paths[p.id];pic.alt=({knight:'Armoured knight',outlaw:'Outlaw scout',warlock:'Warlock arcane caster',tinker:'Tinker field inventor'}[p.klass]||'Adventurer');wrap.append(pic);
+    const wrap=el('div','player'+(p.id===state.me?' me':''));const pic=el('img','portrait');pic.src=paths[p.klass]||paths.knight;pic.alt=({knight:'Armoured knight',outlaw:'Outlaw scout',warlock:'Warlock arcane caster',tinker:'Tinker field inventor'}[p.klass]||'Adventurer');wrap.append(pic);
     const d=el('div','player-details');const name=el('div','player-name',p.name+(p.id===state.me?' (you)':''));d.append(name);
     d.append(el('div','player-place',(p.connected?'● ':'○ ')+roomDef(p.room).name));
     const bar=el('div','hpbar'),fill=el('div','hpfill');fill.style.width=Math.max(0,100*p.hp/p.maxHp)+'%';bar.append(fill);d.append(bar);
@@ -308,7 +316,7 @@ function syncUI(){if(!state||!me)return;
   $('endTurnBtn').disabled=!connected||!myTurn||!rolled||me.hp<=0;
   $('endTurnQuickBtn').disabled=$('endTurnBtn').disabled;
   $('endTurnBtn').textContent=myTurn?(submitted?'✓ END TURN · Resolve action':'✓ END TURN · Next player'):'⌛ Waiting';
-  $('endTurnQuickBtn').textContent=myTurn?'✓ END TURN':'⌛ WAITING';
+  $('endTurnQuickBtn').textContent=myTurn?'✓ END TURN (E)':'⌛ WAITING';
   $('returnCampBtn').disabled=!connected||active||me.hp<=0||state.turn?.activePlayer!==me.id;
   $('returnCampBtn').textContent=me.room==='camp'?'🪙 View Merchant ↓':'🏕 Camp / Shop';
   $('returnCampBtn').title=active?'Finish the encounter first':me.room==='camp'?'Scroll to the merchant below':'Visit the merchant independently, without moving teammates';
@@ -325,15 +333,16 @@ function syncUI(){if(!state||!me)return;
   const availableLantern=lanterns.findIndex(([x,y],i)=>!(battle.litLanterns||[]).includes(i)&&Math.abs(x-me.x)+Math.abs(y-me.y)<=1);
   $('lanternBtn').hidden=room.quest!==14||battle.status!=='active';
   $('lanternBtn').disabled=availableLantern<0||!connected||submitted||!myTurn||!rolled||me.hp<=0;
-  $('lanternBtn').textContent=availableLantern>=0?'🏮 Light Lantern · L':'🏮 Approach an Unlit Lantern';
+  $('lanternBtn').textContent=availableLantern>=0?'🏮 Light Lantern · Items':'🏮 Approach an Unlit Lantern';
   const stat=me.combatStats||{};
   const main=me.inventory?.equipment?.find(item=>item.id===me.equipped?.weapon);
   const special=stat.special;
   const last=main&&me.specialUsedAt?.[main.id];
   const cooling=last===undefined||!special?0:Math.max(0,last+special.cooldown-(me.combatTurns||0));
   $('specialBtn').disabled=!connected||!active||submitted||!myTurn||!rolled||me.hp<=0||!special||cooling>0;
-  $('specialBtn').textContent=special?`★ ${main?.rarity} ${main?.category} SPECIAL${cooling?' · '+cooling+' turn(s)':''}`:'★ Special (Legendary+)';
-  $('attackBtn').textContent=stat.category==='Mace'?'⚒ Sweep attack':stat.multishot?'🏹 Multishot':'⚔ Attack';
+  $('specialBtn').textContent=special?`★ Special (S)${cooling?' · '+cooling+' turn(s)':''}`:'★ Special (S)';
+  $('specialBtn').title=special?`${main?.rarity} ${main?.category} special`:'Requires a qualifying equipped weapon';
+  $('attackBtn').textContent=stat.category==='Mace'?'⚒ Sweep (A)':stat.multishot?'🏹 Multishot (A)':'⚔ Attack (A)';
   $('selectedTarget').textContent=selectedEnemyId?`Target: ${battle.enemies.find(e=>e.id===selectedEnemyId)?.name||'nearest'} · tap again to clear`:'Target: nearest enemy · tap a foe to choose';
   const canPotion=!!me.inventory?.potions?.some(x=>x.charges>0);
   const ally=Object.values(state.players).find(p=>p.id!==me.id&&p.connected&&p.room===me.room&&p.hp>0&&p.hp<p.maxHp&&Math.abs(p.x-me.x)+Math.abs(p.y-me.y)===1);
@@ -485,6 +494,8 @@ function updateHeroHud(){
   const charges=potions.reduce((sum,item)=>sum+Math.max(0,item.charges||0),0);
   updateClassSelection();
   $('heroName').textContent=me.name;
+  $('heroPortrait').src=paths[me.klass]||paths.knight;
+  $('heroPortrait').alt=({knight:'Knight',outlaw:'Outlaw',warlock:'Warlock',tinker:'Tinker'}[me.klass]||'Adventurer')+' class piece';
   $('heroClass').textContent=' · '+({knight:'Knight',outlaw:'Outlaw',warlock:'Warlock',tinker:'Tinker'}[me.klass]||'Adventurer')+(me.klass==='knight'?' · Mace/Plate +D2':me.klass==='outlaw'?' · Sword/Shield +D2':me.klass==='warlock'?' · Staff +D4':me.klass==='tinker'?' · Bomb/Meteor +D4':'');
   $('heroLevel').textContent=`Level ${level} / ${LEVEL_CAP}`;
   $('heroHp').textContent=`${me.hp} / ${me.maxHp} HP`;
@@ -655,17 +666,26 @@ function iconAt(s,p,kind,size){
   const giant=kind==='enemy'&&(p.variant==='large'||p.variant==='large-shiny');
   const pt=s.at(p.x+(giant?.5:0),p.y+(giant?.5:0)),height=size||Math.max(26,s.cell*.74);let width=height;
   ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=13;
-  const image=images[kind==='enemy'?'d8':kind];
+  const image=images[kind==='enemy'?'d8':(p.klass||'knight')]||images.knight;
   const outline=kind==='enemy'?'#e8a09b':kind==='one'?'#e5c479':kind==='two'?'#78ebd7':kind==='three'?'#c9a4f5':'#fac393';
   const radius=Math.max(4,height*.13);
   if(giant)width*=1.6;
   const left=pt.x-width*.44,top=pt.y-height*.60,sz=width*.88;
-  ctx.beginPath();ctx.roundRect(left,top,sz,sz,radius);ctx.clip();
-  ctx.fillStyle=kind==='enemy'?'#60323b':'#213d49';ctx.fillRect(left,top,sz,sz);
+  if(kind==='enemy'){
+    ctx.beginPath();ctx.roundRect(left,top,sz,sz,radius);ctx.clip();
+    ctx.fillStyle='#60323b';ctx.fillRect(left,top,sz,sz);
+  }
   if(image?.complete&&image.naturalWidth)ctx.drawImage(image,left,top,sz,sz);
   ctx.restore();
-  ctx.save();ctx.strokeStyle=outline;ctx.lineWidth=kind==='enemy'?2.5:3;
-  ctx.beginPath();ctx.roundRect(left,top,sz,sz,radius);ctx.stroke();
+  ctx.save();ctx.strokeStyle=outline;ctx.lineWidth=kind==='enemy'?2.5:2;
+  if(kind==='enemy'){ctx.beginPath();ctx.roundRect(left,top,sz,sz,radius);ctx.stroke();}
+  else{
+    ctx.beginPath();ctx.ellipse(pt.x,pt.y+height*.34,sz*.42,Math.max(3,sz*.095),0,0,2*Math.PI);ctx.stroke();
+    const n=({one:1,two:2,three:3,four:4}[kind]||0);if(n){
+      ctx.fillStyle=outline;ctx.beginPath();ctx.arc(left+sz*.83,top+sz*.13,Math.max(6,sz*.15),0,2*Math.PI);ctx.fill();
+      ctx.font=`bold ${Math.max(8,sz*.19)}px system-ui`;ctx.fillStyle='#082033';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(''+n,left+sz*.83,top+sz*.13);ctx.textBaseline='alphabetic';
+    }
+  }
   ctx.textAlign='center';ctx.font=`bold ${Math.max(9,Math.round(height*(roomSize(me.room).width>9?.31:.21)))}px system-ui`;
   ctx.lineWidth=3;ctx.strokeStyle='#111a25';ctx.fillStyle='#fff2df';
   const medium=roomSize(me.room).width>9;
@@ -846,16 +866,65 @@ $('potionAllyBtn').onclick=()=>{
 };
 $('toggleView').onclick=()=>{view=view==='tactical'?'illustrated':'tactical';$('toggleView').textContent=view==='tactical'?'▦ Tactical':'◇ Illustrated';render()};
 $('logoutBtn').onclick=()=>{const form=document.createElement('form');form.method='POST';form.action=ROOT+'/api/logout';document.body.append(form);form.submit()};
+// R2 shortcuts are intentionally resolved in one place for both local and online
+// modes. Never execute gameplay actions while typing or while a modal is open.
+const itemsDrawer=$('itemsDrawer');
+const actionDock=document.querySelector('.action-dock');
+const boardAndActions=document.querySelector('.board-and-actions');
+boardAndActions.after(actionDock);
+actionDock.classList.add('r2-action-bar');
+for(const id of ['potionBtn','potionAllyBtn','reviveBtn','nestBtn','lanternBtn'])$('itemsActions').append($(id));
+const searchSidebar=$('searchSidebar');
+// Keep existing loot/search buttons and their event handlers intact.
+const roomTreasure=document.querySelector('.lab-loot');
+searchSidebar.prepend(roomTreasure);
+function toggleSearch(force){
+  const open=force===undefined?!searchSidebar.classList.contains('r2-open'):!!force;
+  searchSidebar.classList.toggle('r2-open',open);
+  $('searchDrawerToggle').setAttribute('aria-expanded',String(open));
+}
+$('searchDrawerToggle').onclick=()=>toggleSearch();
+function toggleItems(force){
+  const open=force===undefined?itemsDrawer.hidden:!!force;
+  itemsDrawer.hidden=!open;
+  $('itemsMenuBtn').setAttribute('aria-expanded',String(open));
+}
+$('itemsMenuBtn').onclick=()=>toggleItems();
+$('itemsCloseBtn').onclick=()=>toggleItems(false);
+function toggleBackpack(){
+  $('heroBag').open=!$('heroBag').open;
+  if($('heroBag').open)$('heroBag').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+$('inventoryShortcutBtn').onclick=toggleBackpack;
+$('r2BackpackBtn').onclick=()=>{toggleItems(false);toggleBackpack()};
+$('r2CombatSuppliesBtn').onclick=()=>{toggleItems(false);$('combatItemsPanel').scrollIntoView({behavior:'smooth',block:'start'})};
+function showAdventureLog(){
+  const log=$('log');const panel=log.closest('.plate');
+  panel.classList.add('r2-log-flash');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  log.focus?.({preventScroll:true});
+  setTimeout(()=>panel.classList.remove('r2-log-flash'),1800);
+}
 window.addEventListener('keydown',ev=>{
-  if(ev.ctrlKey||ev.metaKey||!$('questOverlay').hidden||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;
-  const dir={ArrowUp:'N',ArrowDown:'S',ArrowLeft:'W',ArrowRight:'E',w:'N',s:'S',a:'W',d:'E'}[ev.key];
-  if(dir){requestMove(dir);ev.preventDefault()}
-  else if(ev.key===' '){$('attackBtn').click();ev.preventDefault()}
-  else if(ev.key.toLowerCase()==='f'){$('defendBtn').click();ev.preventDefault()}
-  else if(ev.key.toLowerCase()==='r'){$('reviveBtn').click();ev.preventDefault()}
-  else if(ev.key.toLowerCase()==='n'&&!$('nestBtn').hidden){$('nestBtn').click();ev.preventDefault()}
-  else if(ev.key.toLowerCase()==='l'&&!$('lanternBtn').hidden){$('lanternBtn').click();ev.preventDefault()}
+  if(ev.key==='Escape'){
+    if(!itemsDrawer.hidden){toggleItems(false);ev.preventDefault();return}
+    if(searchSidebar.classList.contains('r2-open')){toggleSearch(false);ev.preventDefault();return}
+  }
+  const action=resolveHotkey(ev,{
+    modalOpen:!$('characterOverlay').hidden||!$('questOverlay').hidden,
+    typing:!!ev.target?.closest?.('input,textarea,select,[contenteditable="true"]')
+  });
+  if(!action)return;
+  const controls={roll:'rollMoveBtn',end:'endTurnQuickBtn',attack:'attackBtn',fortify:'defendBtn',special:'specialBtn',camp:'returnCampBtn',nest:'nestBtn'};
+  if(action.startsWith('move:'))requestMove(action.slice(5));
+  else if(controls[action])$(controls[action]).click();
+  else if(action==='items')toggleItems();
+  else if(action==='inventory')toggleBackpack();
+  else if(action==='log')showAdventureLog();
+  else if(action==='quests')toggleQuestBoard($('questOverlay').hidden);
+  ev.preventDefault();
 });
+
 canvas.addEventListener('pointerup',ev=>{
   if(!state||!me||!frameMetrics||!$('questOverlay').hidden)return;const rect=canvas.getBoundingClientRect(),xx=ev.clientX-rect.left,yy=ev.clientY-rect.top;
   let match=null,d=Infinity;
@@ -930,9 +999,7 @@ $('closeQuests').addEventListener('click',()=>toggleQuestBoard(false));
 $('questOverlay').addEventListener('click',e=>{if(e.target===$('questOverlay'))toggleQuestBoard(false)});
 window.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('questOverlay').hidden){toggleQuestBoard(false);return}
-  if(e.key?.toLowerCase()==='q'&&!e.repeat&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){
-    toggleQuestBoard($('questOverlay').hidden);e.preventDefault();
-  }
+  // Q is handled in the single R2 keyboard dispatcher above.
 });
 loadCampaign();
 window.addEventListener('resize',render);
@@ -1088,7 +1155,7 @@ function updateMazeUI(){
    }
    actions.append(mazeButton('↩ Retreat from boss arena',{type:'maze-retreat'},me.hp>0));
   }
-  actions.append(mazeButton('🛡 Defend',{type:'maze-action',action:{type:'defend'}},ready));
+  actions.append(mazeButton('🛡 Fortify',{type:'maze-action',action:{type:'defend'}},ready));
   actions.append(mazeButton('🧪 Healing Potion',{type:'maze-action',action:{type:'heal'}},ready&&!!me.inventory?.potions?.length));
   for(const [sku,label] of [['blast-bomb','💣 Bomb'],['meteor-scroll','☄ Meteor'],['guardian-ward','🔰 Guardian Tonic'],['super-potion','⚡ Superstrength']]){
    const available=(me.inventory?.consumables||[]).filter(i=>i.sku===sku&&i.charges>0).length;
