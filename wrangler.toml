@@ -9,7 +9,7 @@ workers_dev = true
 [assets]
 directory = "./public"
 binding = "ASSETS"
-base_path = "/dicebound-beta"
+
 run_worker_first = true
 
 [[durable_objects.bindings]]
