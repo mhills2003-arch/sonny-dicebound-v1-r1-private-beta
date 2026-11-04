@@ -20,5 +20,6 @@ test('browser movement no longer rejects current global actor on stale battle-lo
   const clientMove=js.split('function requestMove(dir){')[1].split('const doorPanel=')[0];
   assert.doesNotMatch(clientMove,/eligibleRound|join this fight next round/);
   assert.match(clientMove,/state\.turn\?\.activePlayer!==me\.id/);
-  assert.match(js,/\$\('endTurnQuickBtn'\)\.onclick=\(\)=>send\(\{type:'end-turn'\}\)/);
+  assert.match(js,/\$\('endTurnQuickBtn'\)\.onclick=endTurnAndPassDevice/);
+  assert.match(js,/send\(\{type:'end-turn'\}\)/);
 });

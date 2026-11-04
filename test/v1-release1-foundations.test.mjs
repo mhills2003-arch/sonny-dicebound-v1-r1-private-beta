@@ -44,7 +44,7 @@ test('legacy class is retained when choosing a name; cannot change class during 
 });
 test('beta routes isolate local and online games and protect local seat overrides',()=>{
  const worker=readFileSync(new URL('../src/worker.mjs',import.meta.url),'utf8');
- assert.match(worker,/const roomKey=mode==='local'\?'v1-local-four-seat-test'/);
+ assert.match(worker,/const roomKey=mode==='local'\?localRoomKey\(localGame\)/);
  assert.match(worker,/mode==='local'&&\(identity\.id!=='one'/);
  assert.match(worker,/headers\.set\('x-dicebound-player',activeId\)/);
  assert.match(worker,/if\(u\.pathname===ROOT\+'\/play'&&u\.searchParams\.get\('mode'\)==='local'/);
@@ -60,4 +60,12 @@ test('local browser connects up to four separate websocket seats and uses one ch
  assert.match(html,/id="seatButtons"/);
  assert.match(html,/value="warlock"/);
  assert.match(html,/value="tinker"/);
+});
+
+test('beta root assets serve internal /index.html without a redirect to /',()=>{
+ const config=readFileSync(new URL('../wrangler.toml',import.meta.url),'utf8');
+ const worker=readFileSync(new URL('../src/worker.mjs',import.meta.url),'utf8');
+ assert.match(config,/\[assets\][\s\S]*html_handling\s*=\s*"none"/);
+ assert.doesNotMatch(config,/^base_path\s*=/m);
+ assert.match(worker,/u\.pathname===ROOT\+'\/play'\)\?'\/index\.html'/);
 });
