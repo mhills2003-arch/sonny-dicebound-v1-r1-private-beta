@@ -1,0 +1,16 @@
+{
+  "name": "dicebound-4-browser-preview",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.148.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

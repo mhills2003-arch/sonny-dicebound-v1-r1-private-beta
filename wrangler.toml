@@ -1,0 +1,21 @@
+# DICEBOUND V1 multiplayer Release 1 PRIVATE BETA.
+# This new Worker intentionally has NO sonnylanning.com route.
+# Do not rename it to the current production Worker or attach the /dicebound/* path.
+name = "sonny-dicebound-v1-r1-private-beta"
+main = "src/worker.mjs"
+compatibility_date = "2026-11-04"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+base_path = "/dicebound-beta"
+run_worker_first = true
+
+[[durable_objects.bindings]]
+name = "GAME_ROOM"
+class_name = "GameRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]

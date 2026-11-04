@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101e"><title>DICEBOUND · V1 Multiplayer Beta</title><link rel="stylesheet" href="./styles.css"></head>
+<body>
+<div id="app">
+  <header class="masthead">
+    <div class="brand"><span class="brand-icon">🎲</span><div><strong>DICEBOUND <span>V1</span></strong><small>V1 MULTIPLAYER · PRIVATE BETA</small></div></div>
+    <div class="local-seats" id="localSeats" hidden aria-label="Local player selector"><span>Pass the device to</span><div id="seatButtons"></div></div>
+    <div class="connection"><span class="status-dot" id="connectionDot"></span><span id="connectionText">Connecting…</span><a class="textbtn" href="./">Choose mode</a><button class="textbtn" id="logoutBtn" aria-label="Log out">Sign out</button></div>
+  </header>
+  <nav class="trial-mode"><span id="modeLabel">MULTIPLAYER PRIVATE BETA</span> · <a href="./">Choose game mode</a> <small>(Separate local and online save worlds; live V1 is untouched)</small></nav>
+  <div class="workspace">
+    <aside class="sidebar side-left">
+      <section class="plate"><h2>YOUR ADVENTURERS</h2><div id="people" aria-live="polite">Connecting to the dungeon…</div></section>
+      <section class="plate"><h2>SHARED QUEST MAP</h2><p class="muted">Exploration belongs to the team. Find the doorway at the east or west wall.</p><div id="roomMap"></div></section>
+      <section class="plate campaign-promo"><h2>ORIGINAL CAMPAIGN</h2><p class="quest-count"><strong>15</strong> quests · <strong>133</strong> rooms</p><p class="muted">Recovered from the actual DICEBOUND 3.2.1 game. The full catalogue is available to inspect; the co-operative port is being built quest by quest.</p><button id="openQuestsSide" class="campaign-open">🗺 View quest chronicle</button></section><section class="plate smallprint"><h2>BUILD STATUS</h2><p>This is an <strong>adult-only development lab</strong>. Quests 1–15 are playable technical beta encounters (133 rooms); Extreme quests 13–15 add 45 distinct storm, darkness and final-trial rooms. Parental safeguards remain in development.</p></section>
+    </aside>
+    <main class="main-area">
+      <div class="room-heading"><div><span class="eyebrow" id="currentQuestLabel">QUEST 1 · A ROLL IN THE WOODS</span><h1 id="roomName">Woodland Path</h1><p id="roomSub">Awaiting shared dungeon state…</p></div><div class="room-actions"><button class="viewbtn quest-launch" id="openQuests" type="button">🗺 Quests (Q)</button><button class="viewbtn" id="returnCampBtn" type="button">🏕 Camp / Shop</button><button class="viewbtn resume-quest" id="resumeQuestBtn" type="button" hidden>↩ Return to quest</button><button class="viewbtn" id="toggleView" title="Switch between tactical and illustrated room views">▦ Tactical</button></div></div>
+      <section class="hero-hud" id="heroHud" aria-label="Your character statistics">
+        <div class="hero-hud-title"><div><span class="hud-eyebrow">YOUR CHARACTER</span><strong id="heroName">Connecting…</strong><span id="heroClass" class="hud-muted">—</span></div><span class="hero-level" id="heroLevel">Level —</span></div>
+        <div class="hud-bars">
+          <div class="hud-meter"><div class="hud-meter-label"><span>❤ HEALTH</span><strong id="heroHp">— / —</strong></div><div class="hud-track"><span class="hud-fill hp" id="heroHpFill"></span></div></div>
+          <div class="hud-meter"><div class="hud-meter-label"><span>✦ LEVEL PROGRESS</span><strong id="heroXp">— / — XP</strong></div><div class="hud-track"><span class="hud-fill xp" id="heroXpFill"></span></div></div>
+        </div>
+        <div class="hud-cells">
+          <div class="hud-cell"><span>⚔ Attack</span><strong id="heroAttack">—</strong></div>
+          <div class="hud-cell"><span>🛡 Armour</span><strong id="heroArmour">—</strong></div>
+          <div class="hud-cell"><span>🧪 Potions</span><strong id="heroPotions">—</strong></div>
+          <div class="hud-cell"><span>🪙 Gold</span><strong id="heroGold">—</strong></div>
+        </div>
+        <p class="hud-note" id="heroGearNote">Attack and armour reflect equipped items. Permanent enchantments affect relevant stats.</p>
+        <details class="hero-bag" id="heroBag"><summary>🎒 Backpack details &amp; enchantments</summary><div id="heroInventory" class="hero-bag-content">No items collected yet.</div></details>
+      </section>
+      <section class="plate class-select-panel" id="classSelectPanel" hidden aria-label="Choose your permanent adventurer class">
+        <h2>⚔ CHOOSE YOUR ADVENTURER</h2>
+        <p id="classChoiceNote" class="muted">Choose one class. You keep every earned level, coin, item and quest unlock. The choice is permanent.</p>
+        <div class="class-choice-grid" id="classChoices"></div>
+      </section>
+      <div class="board-and-actions" aria-label="Dungeon, turn status and actions">
+        <aside class="turn-dock" id="turnStatusPanel" aria-label="Global round, clock and waiting status">
+          <div class="turn-dock-head"><span class="turn-dock-title">⌛ TURN STATUS</span><strong id="turnClock" class="turn-clock" aria-label="Time remaining">—s</strong></div>
+          <div id="turnBanner" class="turn-banner" hidden></div>
+          <div class="turn-dock-help">Everyone takes one turn. Enemies go last.</div>
+        </aside>
+        <div class="canvas-wrap" id="canvasWrap"><canvas id="gameCanvas" role="img" aria-label="DICEBOUND tactical dungeon; use the directional buttons or arrow keys to move"></canvas><div class="canvas-help">Arrows, WASD or touch pad to move · Tap a foe to target</div></div>
+        <aside class="action-dock" aria-label="Your turn action buttons">
+          <strong class="action-dock-title">🎲 YOUR ACTIONS</strong>
+          <button id="rollMoveBtn" type="button" class="dock-roll">🎲 Roll Dice</button>
+          <strong id="moveCounter" class="dock-counter">🎲 Roll once per turn</strong>
+          <div class="combat-controls" aria-label="Combat actions">
+            <button id="attackBtn" class="combat-btn attack">⚔ Attack</button>
+            <button id="potionBtn" class="combat-btn potion">🧪 Heal Me</button>
+            <button id="potionAllyBtn" class="combat-btn potion">🧪 Heal Ally</button>
+            <button id="specialBtn" class="combat-btn special">★ Special</button>
+            <button id="defendBtn" class="combat-btn">🛡 Defend</button>
+            <button id="reviveBtn" class="combat-btn">♥ Revive</button>
+            <button id="nestBtn" class="combat-btn" hidden>💠 Disable Nest · N</button><button id="lanternBtn" class="combat-btn" hidden>🏮 Light Lantern · L</button>
+          </div>
+          <button type="button" id="endTurnQuickBtn" class="end-turn-overlay" disabled>✓ END TURN</button>
+        </aside>
+      </div>
+      <div class="target-panel" id="selectedTarget">Target: nearest enemy · tap a foe to choose</div>
+      <div class="movement-roll"><span>One D6 roll per player turn. End Turn passes to the next adventurer; enemies act last.</span></div>
+      <div class="controls">
+        <div class="dpad" aria-label="Movement controls"><button data-dir="N" aria-label="Move north">▲</button><div><button data-dir="W" aria-label="Move west">◀</button><button data-dir="S" aria-label="Move south">▼</button><button data-dir="E" aria-label="Move east">▶</button></div></div>
+        <div class="toolhint"><span id="actionHint">Roll D6 movement and spend the steps.</span><small>Roll, move up to your allowance, optionally attack, heal, defend or revive, then press End Turn. Enemies act after all players finish.</small></div>
+        <button id="endTurnBtn" type="button" hidden tabindex="-1" aria-hidden="true">Legacy End Turn</button>
+      </div>
+    </main>
+    <aside class="sidebar side-right">
+      <section class="plate"><h2>ENCOUNTER</h2><div id="battleStatus" class="battle-status">No enemies nearby</div><div id="enemies"></div></section><section class="plate consumable-panel" id="combatItemsPanel"><h2>💣 COMBAT SUPPLIES</h2><p class="muted">One item uses your combat action for the turn. Buy at the camp merchant; quantities are personal.</p><div id="combatItemsList" aria-live="polite"></div></section>
+      <section class="plate lab-loot"><h2>PERSONAL ROOM TREASURE · TEST</h2>
+        <p class="muted">Each room has four independent searches, each with a 50% chance of finding nothing; quest rarity ceilings apply. The server records each claim. Equipment, off-hand weapons, dice attacks and specials can be tested; balance is being playtested. Training gear is for mechanics checks only.</p>
+        <div id="lootPanel" aria-live="polite">Waiting for room state…</div><button type="button" id="trainingRackBtn" class="training-rack" disabled>🎯 Training rack (Woodland only)</button><p class="muted" style="font-size:11px">Testing-only equipment is not representative of campaign balance. Use a fresh v9 balance trial.</p>
+        <p class="muted" id="lootSummary">Gold 0 · Equipment 0 · Potions 0 · Enchantments 0</p>
+        <button type="button" id="resetLabBtn" class="lab-reset" hidden>↻ Reset test adventure (Player One)</button>
+        <p class="muted lab-warning">Adult technical testing only. Reset removes all 133 test rooms, quest unlocks, XP, equipment, gold and treasure for every connected test character.</p>
+      </section>
+      <section class="plate maze-control-panel" id="mazeControlPanel"><h2>🧭 ENDGAME MAZE</h2>
+        <p class="muted">Unlocks after Quest 15. Three save slots, shared map and clues, six possible bosses.</p>
+        <div id="mazeSlotChoices"></div><div id="mazeRewardChoices"></div>
+        <div id="mazeLive" hidden><h3 id="mazeRoomHeading">Maze chamber</h3>
+          <div id="mazeMap" class="maze-map" role="img" aria-label="Shared Maze discovery map"></div>
+          <p id="mazeRoomStatus" class="muted"></p><div id="mazeDirections" class="maze-directions"></div>
+          <div id="mazeEnemies"></div><div id="mazeArena" class="maze-arena" aria-label="7 by 7 final boss arena" hidden></div><div id="mazeTactics" class="maze-actions"></div>
+          <div id="mazeSearchActions" class="maze-actions"></div>
+          <details><summary>📜 Shared journal</summary><div id="mazeJournal"></div></details>
+          <button type="button" id="mazeLeaveBtn">Return to camp (save position)</button>
+          <button type="button" id="mazeAbandonBtn">Vote to abandon expedition</button>
+        </div>
+      </section>
+      <section class="plate" id="questRewardPanel" hidden><h2>🏆 VICTORY CHEST</h2><p class="muted">Choose one equipment reward. The chest cannot be rerolled.</p><div id="questRewardChoices"></div></section><section class="plate" id="merchantPanel" hidden><h2>🪙 CAMP MERCHANT</h2><p class="muted">Buy potions, bombs, wards, meteors, superstrength and gear. Medium: Legendary offers are rare; Hard: occasional Mythic; Extreme: Legendary/Mythic stock plus a 5% chance of one Exotic offer after a qualifying boss.</p><div id="merchantStock"></div><h3 class="merchant-sell-heading">SELL ITEMS TO MERCHANT</h3><p class="muted">Buyback values are shown below. Selling permanently removes the item, including any bound enchantments.</p><div id="merchantSell"></div></section>
+      <section class="plate adventurelog"><h2>ADVENTURE LOG</h2><div id="log" role="log" aria-live="polite">Your adventure will appear here…</div></section>
+      <section class="plate instructions"><h2>QUICK CONTROLS</h2><p><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or WASD: move</p><p><kbd>Space</kbd> Attack · <kbd>F</kbd> Defend · <kbd>R</kbd> Revive · <kbd>N</kbd> Disable adjacent Warrens nest · <kbd>L</kbd> Light an adjacent Abyss lantern</p><p class="muted">Separate browser sessions with individual adult-test invitation codes simulate co-operative tablets.</p></section>
+    </aside>
+  </div>
+  <button id="chatLauncher" class="chat-launcher" type="button" aria-expanded="false" aria-controls="chatDrawer">💬 Chat <span id="chatUnread" class="chat-unread" hidden>New</span></button>
+  <section id="chatDrawer" class="chat-drawer" aria-label="Supervised adventurer chat" hidden>
+    <header class="chat-header"><div><strong>💬 Adventurer Chat</strong><small>Private test players · parent supervised</small></div><button id="chatClose" type="button" aria-label="Close chat">✕</button></header>
+    <div id="chatMessages" class="chat-messages" role="log" aria-label="Chat messages" aria-live="polite"><p class="muted">Connecting to chat…</p></div>
+    <div class="chat-emoji-bar" id="chatEmojiBar" role="group" aria-label="Insert an emoji"></div><form id="chatForm" class="chat-form"><label class="chat-label" for="chatInput">Message (180 characters maximum)</label><div class="chat-compose"><input id="chatInput" name="chat" maxlength="180" autocomplete="off" placeholder="Say something to your team…"><button type="submit" id="chatSend">Send</button></div></form>
+    <div class="chat-options"><label for="chatMuteSelect">Hide messages from:</label><select id="chatMuteSelect"><option value="">Choose a player</option></select><button id="chatMuteBtn" type="button">Mute / Unmute</button></div>
+    <details class="chat-guidance"><summary>Safety and reports</summary><p>Messages are visible to everyone in this private test world, even in other rooms. Select Report beside any message to notify Player 1. Basic language, link and contact-detail filtering applies but cannot catch everything. Test together with an adult; this is not an unsupervised children's chat.</p><div id="chatAdminPanel" hidden><strong>Player 1 — report inbox and chat control</strong><div id="chatReports"></div><div class="chat-options"><select id="chatAdminPlayer"><option value="">Choose player</option></select><button id="chatAdminMute" type="button">Suspend / Restore Chat</button></div></div></details>
+  </section>
+  <div id="characterOverlay" class="character-overlay" hidden>
+    <form id="characterForm" class="character-dialog" aria-label="Create your multiplayer character">
+      <span class="eyebrow">DICEBOUND · YOUR ADVENTURER</span>
+      <h2>Choose your name and class</h2>
+      <p>Each player chooses their name and one permanent class before joining the adventure. Your character and equipment are saved between sessions.</p>
+      <label for="characterName">Adventurer name</label>
+      <input id="characterName" name="name" maxlength="24" minlength="2" autocomplete="off" required placeholder="Your character name">
+      <label for="characterClass">Choose class</label>
+      <select id="characterClass" name="klass">
+        <option value="knight">🛡 Knight · balanced defender</option>
+        <option value="outlaw">🏹 Outlaw · sword and shield</option>
+        <option value="warlock">🔮 Warlock · staff and magic</option>
+        <option value="tinker">⚙ Tinker · devices and enchantments</option>
+      </select>
+      <p class="class-permanent">Class selection is permanent. Choose carefully.</p>
+      <button type="submit">Create adventurer</button>
+      <div id="setupError" role="alert" class="setup-error" hidden></div>
+    </form>
+  </div>
+  <div id="questOverlay" class="quest-overlay" hidden>
+    <div class="quest-window" role="dialog" aria-modal="true" aria-labelledby="questDialogTitle">
+      <header class="quest-top"><div><span class="eyebrow">FROM THE ORIGINAL DICEBOUND 3.2.1</span><h2 id="questDialogTitle">THE QUEST CHRONICLE</h2><p>All fifteen original adventures · 133 rooms</p></div><button id="closeQuests" class="quest-close" aria-label="Close quest chronicle">✕</button></header>
+      <div class="quest-inner"><nav id="campaignList" class="quest-list" aria-label="Campaign quests"></nav><div id="campaignDetail" class="quest-detail" aria-live="polite"><p>Loading the original quest catalogue…</p></div></div>
+      <footer class="quest-foot">All 15 quests are playable technical beta encounters. Do not invite children while safeguards are unfinished.</footer>
+    </div>
+  </div>
+  <section id="milestoneNotice" class="milestone-notice" role="alertdialog" aria-live="assertive" aria-label="Adventure achievement" hidden><button type="button" id="noticeClose" aria-label="Dismiss announcement">✕</button><div class="notice-icon">🎲</div><h2 id="noticeTitle"></h2><p id="noticeBody"></p></section>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</div>
+<script type="module" src="./app.js"></script>
+</body></html>

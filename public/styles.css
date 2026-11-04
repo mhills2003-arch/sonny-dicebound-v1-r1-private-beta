@@ -1,0 +1,273 @@
+:root{--bg:#07101e;--paper:#eadfc5;--gold:#e8c878;--mint:#7ae6d0;--panel:rgba(11,20,34,.94);--line:rgba(226,188,119,.34)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#233b51 0%,#081423 55%,#030714 100%);color:var(--paper);font:14px/1.5 system-ui,'Segoe UI',Arial,sans-serif;min-height:100dvh}button{font:inherit;cursor:pointer}button:disabled{opacity:.38;cursor:not-allowed}.masthead{height:76px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:8px 23px;background:linear-gradient(90deg,#06111f,#152536,#08111e)}.brand{display:flex;gap:12px;align-items:center}.brand-icon{font-size:34px}.brand strong{font:700 24px Georgia,serif;letter-spacing:.08em;color:#f3d494}.brand strong span{color:#94eed9}.brand small{display:block;letter-spacing:.22em;font-size:9px;color:#9baebd;margin-top:2px}.connection{display:flex;gap:9px;align-items:center;color:#c2ced7;font-size:12px}.status-dot{height:8px;width:8px;border-radius:50%;background:#c66d6d;box-shadow:0 0 9px #c66d6d77}.status-dot.online{background:#67e3ad;box-shadow:0 0 9px #67e3ad99}.textbtn{border:1px solid #61718b;color:#e8dac4;background:#0b182a;padding:6px 11px;border-radius:7px;margin-left:9px}.workspace{max-width:1780px;margin:auto;display:grid;grid-template-columns:245px minmax(0,1fr) 265px;gap:13px;padding:13px;min-height:calc(100dvh - 76px)}.sidebar{display:flex;flex-direction:column;gap:13px}.plate{padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px #0004}.plate h2{margin:0 0 12px;font-size:11px;letter-spacing:.13em;color:#ecd395;font-weight:800}.muted{color:#a9b8c7;font-size:12px;margin:7px 0}.smallprint p,.instructions p{font-size:12px;color:#adbac9}.main-area{min-width:0;display:flex;flex-direction:column;gap:10px}.room-heading{min-height:85px;display:flex;justify-content:space-between;align-items:center;padding:7px 14px 10px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(90deg,#132438cc,#091322bb)}.room-heading h1{font:600 24px Georgia,serif;color:#f8da9e;margin:3px 0}.room-heading p{margin:0;font-size:12px;color:#a2c9c3}.eyebrow{font-size:10px;font-weight:750;letter-spacing:.15em;color:#c4ae79}.viewbtn{padding:9px 13px;border-radius:9px;background:#253750;border:1px solid #72839c;color:#f2e5cd;white-space:nowrap}.canvas-wrap{position:relative;flex:1;min-height:330px;max-height:calc(100dvh - 276px);border:1px solid #c6a56968;border-radius:15px;background:radial-gradient(ellipse,#1b2d40,#06111b 80%);overflow:hidden}#gameCanvas{width:100%;height:100%;display:block;touch-action:manipulation}.canvas-help{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:11px;color:#b8c4ce;padding:7px 10px;background:#07111edb;pointer-events:none}.turn-banner{position:absolute;left:50%;top:13px;transform:translateX(-50%);border:1px solid #d2ad65;background:#142437f2;border-radius:18px;padding:7px 16px;font-weight:700;color:#efdaab;box-shadow:0 7px 18px #0009;white-space:nowrap;pointer-events:none}.controls{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;gap:20px;padding:10px 16px;min-height:103px}.dpad{text-align:center;flex:none}.dpad button{min-width:42px;height:38px;margin:1px;border:1px solid #6c87a2;border-radius:8px;background:#1f3550;color:#e8ddc9;font-size:16px}.dpad button:active,.combat-btn:active{background:#426382}.combat-controls{display:grid;grid-template-columns:repeat(3,auto);gap:6px}.combat-btn{min-height:52px;padding:0 13px;color:#e7dcc5;background:#283447;border:1px solid #637287;border-radius:9px;font-weight:650}.combat-btn.attack{background:#56382b;border-color:#ac8262}.toolhint{flex:1;min-width:100px;font-size:12px;color:#e4cf9e}.toolhint small{display:block;color:#a2b6c7;margin-top:6px;font-size:11px}.player{display:flex;gap:10px;align-items:center;background:#14253a;border:1px solid #334d62;border-radius:9px;padding:7px;margin:7px 0}.player.me{border-color:#c9ab70;background:#253048}.portrait{width:55px;height:55px;border-radius:8px;object-fit:cover;border:1px solid #7b6349}.player-details{min-width:0;flex:1}.player-name{font-weight:700;line-height:1.1;overflow:hidden;text-overflow:ellipsis}.player-place{font-size:11px;color:#bcc9d3;margin-top:4px}.hpbar{height:6px;background:#331a1b;margin-top:6px;border-radius:8px;overflow:hidden}.hpfill{height:100%;background:linear-gradient(90deg,#be4345,#85d789)}.player-stats{font-size:11px;color:#a8e1bb;margin-top:3px}.roomlink{background:#0c1a2d;border:1px solid #405063;color:#a7b1bc;padding:9px 10px;border-radius:8px;font-weight:600;margin:6px 0;font-size:12px}.roomlink.seen{color:#f2d79b;border-color:#9d8055}.roomlink.active{background:#304054}.enemy{display:flex;gap:12px;align-items:center;border:1px solid #624648;background:#2c202b;border-radius:8px;padding:8px;margin:6px 0}.enemy img{width:56px;height:56px;object-fit:cover;border-radius:6px}.enemy small{color:#dda8ab}.battle-status{font-size:12px;color:#c9d5d9}.adventurelog{flex:1;min-height:205px}.adventurelog #log{overflow:auto;max-height:36vh;min-height:175px;font-size:12px;display:flex;flex-direction:column-reverse;gap:7px}.logentry{border-bottom:1px solid #ffffff18;padding:4px 0;color:#ddd0ba}.logentry:first-child{color:#a6e6d3}.instructions kbd{background:#2d4053;border:1px solid #748598;border-radius:4px;font-size:11px;padding:2px 5px}.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#402932;border:1px solid #e7a8a6;color:#ffe5e4;padding:10px 20px;border-radius:10px;box-shadow:0 8px 22px #0009;z-index:30;display:none}
+@media(max-width:1150px){.workspace{grid-template-columns:208px minmax(0,1fr)}.side-right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.instructions{display:none}.adventurelog #log{max-height:160px;min-height:100px}.canvas-wrap{min-height:390px;max-height:none}}
+@media(max-width:760px){.masthead{height:58px;padding:4px 10px}.brand strong{font-size:17px}.brand small{font-size:7px}.brand-icon{font-size:25px}.workspace{display:flex;flex-direction:column;min-height:calc(100dvh - 58px);padding:7px;gap:8px}.side-left{order:2;display:grid;grid-template-columns:1fr 1fr;gap:7px}.smallprint{display:none}.side-right{order:3;grid-template-columns:1fr 1fr}.plate{padding:9px}.plate h2{font-size:10px;margin-bottom:6px}.main-area{order:1}.room-heading{min-height:65px;padding:7px 9px}.room-heading h1{font-size:19px}.canvas-wrap{min-height:300px;height:40dvh;max-height:none;flex:auto}.canvas-help{font-size:9px;padding:4px}.controls{padding:7px;gap:7px;min-height:84px}.dpad button{min-width:39px;height:35px}.combat-controls{flex:1;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.combat-btn{min-height:58px;padding:5px;font-size:11px}.toolhint{display:none}.portrait{height:36px;width:36px}.roomlink{padding:6px}.adventurelog #log{min-height:140px}.connection{font-size:10px}.viewbtn{padding:5px 8px;font-size:11px}}
+
+/* Campaign integration v3 — original DICEBOUND quest chronicle and authentic art */
+.room-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.campaign-open,.quest-launch{background:#433523;color:#f3d9a5;border:1px solid #b99351;border-radius:8px;padding:9px 12px;font-weight:700}
+.campaign-open{width:100%;margin-top:8px}
+.quest-count{margin:6px 0;color:#efd6a7}
+.quest-count strong{font:700 20px Georgia,serif}
+.quest-overlay[hidden]{display:none}
+.quest-overlay{position:fixed;inset:0;background:#02070de8;display:flex;align-items:center;justify-content:center;padding:16px;z-index:80}
+.quest-window{width:min(1080px,100%);max-height:min(92dvh,890px);display:flex;flex-direction:column;background:linear-gradient(125deg,#192b3b,#090f20 75%);border:2px solid #b69458;border-radius:17px;box-shadow:0 12px 60px #000b;overflow:hidden}
+.quest-top{display:flex;justify-content:space-between;gap:16px;padding:20px 23px 15px;background:linear-gradient(100deg,#2d312b,#192536);border-bottom:1px solid #9b8157}
+.quest-top h2{font:700 25px Georgia,serif;color:#ffe3aa;letter-spacing:.06em;margin:4px 0 1px}
+.quest-top p{color:#bbcbcb;margin:0}
+.quest-close{align-self:start;border:1px solid #aa9369;background:#342a30;color:#fff;padding:8px 12px;border-radius:8px;font-weight:800}
+.quest-inner{display:grid;grid-template-columns:minmax(210px,35%) 1fr;overflow:auto;min-height:0}
+.quest-list{display:flex;flex-direction:column;gap:6px;padding:14px;background:#091522;border-right:1px solid #6c634e;overflow:auto}
+.quest-choice{border:1px solid #485467;color:#f1e3cb;background:#132437;text-align:left;border-radius:8px;padding:9px 10px}
+.quest-choice.picked{border-color:#dbbd79;background:#3b3840}
+.quest-choice-heading{display:block;font-size:12px;font-weight:750;line-height:1.3}
+.quest-choice-meta{display:block;font-size:10px;color:#bed3ca;margin-top:4px;letter-spacing:.03em}
+.quest-detail{padding:17px 22px;overflow:auto}
+.quest-detail-label{font-size:11px;letter-spacing:.12em;color:#dcc28c;font-weight:800}
+.quest-detail h3{font:700 24px Georgia,serif;color:#f9dba0;margin:8px 0 14px}
+.quest-live,.quest-pending{border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700}
+.quest-live{border:1px solid #679d80;background:#18382d;color:#a3e9bd}
+.quest-pending{border:1px solid #a18a62;background:#403625;color:#efd6a6}
+.quest-rooms{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:7px}
+.quest-room{display:flex;flex-direction:column;gap:2px;border-left:3px solid #816a4a;padding:7px 10px;background:#182839}
+.quest-room strong{font-size:13px;color:#ead5ac}
+.quest-room span{font-size:11px;color:#b7c5cb}
+.quest-room.quest-discovered{border-left-color:#70be9b}
+.quest-foot{padding:11px 23px;background:#0b1624;border-top:1px solid #635638;color:#c4c6b8;font-size:12px}
+@media(max-width:760px){.room-heading{gap:6px}.room-actions{max-width:45%}.room-actions button{font-size:10px;padding:6px}.quest-overlay{padding:5px}.quest-window{max-height:97dvh}.quest-top{padding:12px}.quest-top h2{font-size:18px}.quest-inner{grid-template-columns:125px 1fr}.quest-list{padding:7px;gap:3px}.quest-choice{padding:6px}.quest-choice-heading{font-size:10px}.quest-choice-meta{font-size:8px}.quest-detail{padding:10px}.quest-detail h3{font-size:18px}.quest-room strong{font-size:11px}.quest-room span{font-size:10px}.quest-foot{font-size:10px;padding:7px}}
+
+/* Stage 2B: personal 4-pickup lab, clearly separate from the production game */
+#lootPanel{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.loot-claim{min-height:43px;border-radius:8px;background:#1b3340;border:1px solid #7e987b;color:#f3deb4;padding:7px 5px;font-weight:700;font-size:11px}
+.loot-claim:disabled{color:#8caaa5;border-color:#334d55;background:#18252d}
+.lab-reset{padding:9px 11px;width:100%;border:1px solid #c5967a;border-radius:8px;background:#462c2b;color:#ffe6ca;font-size:12px;font-weight:700}
+.lab-warning{font-size:10px}.loot-recent{color:#d6c3f5;font-size:11px}
+@media(max-width:760px){#lootPanel{grid-template-columns:1fr 1fr}.loot-claim{font-size:11px;min-height:42px}}
+
+/* Phase 2C: always-visible, character-specific tactical status HUD */
+.hero-hud{padding:10px 13px;background:linear-gradient(100deg,#1a2c3a,#10202c);border:1px solid #90794e;border-radius:12px;color:#f5e5c7;display:grid;grid-template-columns:minmax(146px,.8fr) minmax(165px,1.35fr) minmax(260px,2fr);gap:10px;align-items:center}
+.hero-hud-title{min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 7px}.hero-hud-title>div{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px}.hud-eyebrow{font-size:9px;color:#d9bb7e;letter-spacing:.11em;display:block;flex-basis:100%}.hero-hud-title strong{font-size:15px}.hud-muted{color:#aabebf;font-size:11px}.hero-level{font-size:11px;color:#f2daa3;border-radius:15px;border:1px solid #75674b;padding:3px 7px}.hud-bars{display:grid;gap:8px}.hud-meter-label{display:flex;justify-content:space-between;gap:7px;font-size:10px;color:#c6d5d7}.hud-meter-label strong{color:#f1e1c5;font-size:11px;white-space:nowrap}.hud-track{margin-top:3px;height:7px;background:#111c26;border-radius:99px;overflow:hidden;border:1px solid #3d5162}.hud-fill{height:100%;display:block;transition:width .2s}.hud-fill.hp{background:linear-gradient(90deg,#a53c47,#79d7a3)}.hud-fill.xp{background:linear-gradient(90deg,#946ad2,#d3ba81)}.hud-cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.hud-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border:1px solid #455563;background:#0d1c2bc7;padding:5px 3px;border-radius:8px}.hud-cell span{font-size:10px;color:#c1cdd2;white-space:nowrap}.hud-cell strong{font-size:12px;color:#f7dfb4;white-space:nowrap}.hud-note{margin:0;grid-column:1/-1;color:#adbdc7;font-size:10px}
+@media(max-width:1250px){.hero-hud{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hud-cells{grid-column:1/-1}}
+@media(max-width:760px){.hero-hud{padding:8px;gap:6px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hero-hud-title strong{font-size:13px}.hero-level{font-size:10px}.hud-bars{gap:4px}.hud-meter-label{font-size:9px}.hud-meter-label strong{font-size:10px}.hud-cells{gap:4px}.hud-cell{padding:6px 1px}.hud-cell span{font-size:9px}.hud-cell strong{font-size:11px}.hud-note{font-size:9px}}
+
+.hero-bag{grid-column:1/-1;color:#e7d5b5;font-size:11px;border-top:1px solid #7f74475c;padding-top:5px}.hero-bag summary{cursor:pointer;padding:3px 2px;font-weight:650}.hero-bag-content{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}.hero-bag-section{padding:7px 9px;background:#0a1826;border:1px solid #4a5a5c;border-radius:8px}.hero-bag-section strong{font-size:11px;color:#f4deb4}.hero-bag-section ul{padding-left:17px;margin:5px 0;color:#c2d1d5;font-size:10px;line-height:1.5}
+@media(max-width:760px){.hero-bag-content{grid-template-columns:1fr;gap:5px}}
+
+/* Phase 3A: real equipment and server-side potion controls */
+.combat-controls{grid-template-columns:repeat(5,minmax(0,1fr));}
+.combat-btn.potion{border-color:#48775b;background:#1b413d;color:#d9f8e4}
+.bag-item{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px;padding:5px;border:1px solid #384b56;border-radius:6px;font-size:11px;flex-wrap:wrap;}
+.bag-item span:first-child{flex:1;min-width:80px}
+.bag-action{background:#d4b879;color:#18263b;border:0;padding:7px 9px;border-radius:7px;font-size:10px;font-weight:750;cursor:pointer}
+.bag-action:disabled{background:#5e666c;color:#ddd;cursor:not-allowed}
+.bag-select{background:#101f32;color:#f9e4b9;border:1px solid #806c4d;border-radius:7px;padding:6px;max-width:175px;font-size:10px}
+@media(max-width:760px){.combat-controls{grid-template-columns:repeat(5,minmax(0,1fr))}.combat-btn{font-size:10px;min-height:53px}.hero-bag-content{grid-template-columns:1fr;}.bag-select{max-width:135px}}
+@media(max-width:390px){.combat-controls{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Phase 3B: actual dice rolls, dual wield and target selection */
+.combat-controls{grid-template-columns:repeat(3,minmax(0,1fr));}
+.combat-btn.special{border:1px solid #cbab60;background:#56442c;color:#ffecbf;font-size:11px}
+.target-panel{margin:7px 0 0 12px;color:#eed49a;font-size:12px;font-weight:700;min-height:17px}
+.target-choice{width:100%;display:flex;align-items:center;gap:9px;text-align:left;border:1px solid #314e60;background:#152736;color:#f1d7a0;padding:7px;border-radius:8px;margin-top:7px;cursor:pointer}
+.target-choice.selected{background:#483627;border-color:#f7c56f;box-shadow:0 0 0 2px #dcb46a40}
+.target-choice:disabled{opacity:.5;cursor:default}
+.target-choice img{width:34px;height:34px;object-fit:contain}
+.training-rack{width:100%;margin-top:9px;padding:10px;border-radius:8px;background:#42503b;border:1px solid #b7ca85;color:#f4ecbe;font-weight:800}
+.training-rack:disabled{background:#1c2b29;border-color:#486255;color:#97a79e}
+.hero-hud .hud-cell strong{white-space:normal;text-align:center}
+.bag-item{align-items:center}
+@media(max-width:760px){.combat-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.combat-btn{min-height:50px}.combat-btn.special{font-size:10px}.bag-action{font-size:10px;min-height:35px}.target-panel{font-size:11px;margin-left:7px}}
+
+/* Phase 4A: real quest launch with locked state */
+.quest-launch{display:block;margin:12px 0;min-height:43px}.quest-launch:disabled{cursor:not-allowed;opacity:.45}.quest-launch:not(:disabled){cursor:pointer}
+
+/* v9 - prominently announced progression, tactical dice movement, camp merchant */
+.trial-mode{background:#122739;border-block:1px solid #9b8251;padding:7px 14px;font:600 12px system-ui;color:#f2dca6;text-align:center}
+.trial-mode a{color:#b9e7dc;margin:0 6px}.trial-mode small{color:#abbec3}
+.movement-roll{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px;background:#162d37;border:1px solid #a89156;border-radius:10px;margin:7px 0}
+.movement-roll button{border:0;border-radius:9px;background:#edd08b;color:#162337;font-weight:800;padding:11px 15px;font-size:14px}
+.movement-roll button:disabled{background:#53626b;color:#e2e0d1}
+.movement-roll strong{color:#f8df9f;min-width:95px}.movement-roll span{font-size:11px;color:#c8d8d4}
+.milestone-notice[hidden],#merchantPanel[hidden]{display:none}
+.milestone-notice{position:fixed;z-index:110;inset:auto 12px 13% 12px;max-width:520px;margin:auto;padding:30px 28px 22px;background:linear-gradient(135deg,#273e43,#15212f);border:3px solid #f8d37b;border-radius:20px;text-align:center;box-shadow:0 0 0 100vmax #0008,0 18px 70px #000a;color:#f4e7cb;animation:levelpop .36s ease-out}
+.milestone-notice h2{font:700 clamp(24px,6vw,38px) Georgia,serif;margin:6px 0;color:#ffe394}
+.milestone-notice .notice-icon{font-size:40px}.milestone-notice p{font:600 16px/1.5 system-ui;margin:8px 0}
+.milestone-notice.quest{border-color:#77cdaa}.milestone-notice.treasure{border-color:#b99bff}.milestone-notice.down{border-color:#ec8f8f}
+.milestone-notice #noticeClose{position:absolute;top:9px;right:9px;background:#543c2d;color:#fff;border:1px solid #ffe394;border-radius:6px;padding:7px 11px}
+@keyframes levelpop{from{transform:scale(.88);opacity:.25}to{transform:scale(1);opacity:1}}
+#merchantStock{display:grid;gap:6px}.shop-item{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:7px 9px;background:#152c33;border-radius:7px;color:#f5e2b3;font-size:12px}
+@media(max-width:760px){.movement-roll{gap:7px;padding:7px}.movement-roll button{font-size:12px;padding:9px}.movement-roll span{flex-basis:100%}.milestone-notice{bottom:14%;padding:22px 18px}}
+
+/* v9 Candidate 2: unmistakable sequential combat turn and merchant access */
+.combat-btn.end-turn{background:linear-gradient(130deg,#dfbd6a,#b6893b);border:2px solid #ffe2a0;color:#18243a;font-weight:900;min-height:54px;font-size:14px}
+.combat-btn.end-turn:disabled{background:#263747;border-color:#4b6276;color:#afc0c7}
+#turnBanner{max-width:94%;white-space:normal;text-align:center;font-size:14px;line-height:1.25}
+#actionHint{color:#ffe3a1;font-weight:750;font-size:13px}
+.room-actions{display:flex;flex-wrap:wrap;gap:5px}
+@media(max-width:760px){.combat-btn.end-turn{grid-column:span 3;font-size:15px;min-height:55px}.room-actions{max-width:65%;justify-content:flex-end}.room-actions button{font-size:10px;padding:7px 8px}.turn-banner{font-size:12px!important}}
+
+/* v9 Candidate 3: the whole adventure has ONE global player order. */
+#globalTurnStrip{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 0;padding:9px 11px;background:#172b39;border:1px solid #bc9a61;border-radius:10px;color:#f2ddae;font:700 12px system-ui;}
+#globalTurnStrip .turn-heading{margin-right:4px;white-space:nowrap}
+#globalTurnStrip .turn-step{padding:6px 8px;border:1px solid #4b5969;border-radius:7px;background:#243646;color:#d4dde4;}
+#globalTurnStrip .turn-step.now{background:#e9cb7d;color:#142436;border-color:#ffe7a4;box-shadow:0 0 0 2px #dab97640;}
+#globalTurnStrip .turn-step.done{background:#203c33;color:#b8e6d2;border-color:#467563;}
+#globalTurnStrip .turn-enemies{font-weight:600;color:#c7d9e1;font-size:11px;flex-basis:100%}
+@media(max-width:760px){#globalTurnStrip{font-size:11px;padding:7px;gap:4px}#globalTurnStrip .turn-step{padding:5px 6px}}
+
+/* v9 Candidate 4: End Turn must be visible ON the dungeon board at every viewport. */
+.end-turn-overlay{position:absolute;z-index:8;right:12px;bottom:36px;min-height:52px;min-width:132px;padding:9px 15px;border-radius:12px;border:2px solid #ffe1a0;background:linear-gradient(130deg,#f1d28a,#c69a4d);color:#162536;font:900 15px system-ui;box-shadow:0 5px 20px #000b;cursor:pointer}
+.end-turn-overlay:disabled{background:#263747;color:#b9c6cf;border-color:#52687c;cursor:not-allowed}
+.resume-quest{background:#265242;border-color:#76c6a0;color:#e5f7ef}
+#merchantSell{display:grid;gap:7px}.merchant-sell-heading{font-size:12px;color:#e6cf95;letter-spacing:.07em;margin:17px 0 5px}
+@media(max-width:760px){.end-turn-overlay{min-width:121px;min-height:51px;font-size:13px;bottom:27px;right:8px;padding:7px 12px}.room-actions{max-width:75%}}
+
+
+/* v9 Candidate 5: all game actions beside the dungeon, never over map squares. */
+.board-and-actions{display:flex;gap:9px;min-height:360px;height:clamp(360px,52dvh,560px);align-items:stretch;min-width:0}
+.board-and-actions .canvas-wrap{flex:1 1 auto;min-width:0;height:100%;min-height:0;max-height:none}
+.action-dock{display:flex;flex-direction:column;flex:0 0 158px;width:158px;min-height:0;gap:6px;padding:10px 8px;background:linear-gradient(180deg,#182e3e,#0c1c2c);border:1px solid #ba9a61;border-radius:12px;box-shadow:0 8px 24px #0005}
+.action-dock-title{color:#f4dc9d;font-size:11px;letter-spacing:.06em;text-align:center;flex:none}
+.action-dock #rollMoveBtn{display:block;width:100%;min-height:44px;border-radius:8px;border:1px solid #f5d48a;background:#e4c67f;color:#142637;font-weight:800;font-size:13px;padding:5px;flex:none}
+.action-dock #rollMoveBtn:disabled{opacity:.4}
+.action-dock .dock-counter{font-size:11px;color:#f8df9f;text-align:center;flex:none;white-space:normal;line-height:1.2}
+.action-dock .combat-controls{display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;flex-direction:column;gap:5px;align-items:stretch;grid-template-columns:none;padding:1px}
+.action-dock .combat-btn{display:block;min-height:39px;flex:0 0 auto;width:100%;font-size:12px;line-height:1.15;padding:6px 4px;overflow-wrap:anywhere}
+.action-dock .combat-btn.special{font-size:10px}
+.action-dock .end-turn-overlay{position:static;display:block;width:100%;min-width:0;min-height:51px;flex:none;font-size:14px;padding:7px 4px;z-index:auto;margin:0}
+.controls{min-height:75px}.controls .toolhint{display:block}
+.controls #endTurnBtn[hidden]{display:none!important}
+@media(max-width:760px){
+ .board-and-actions{height:clamp(335px,47dvh,485px);min-height:335px;gap:6px}
+ .action-dock{width:147px;flex-basis:147px;padding:7px 5px;gap:4px}
+ .action-dock .combat-btn{font-size:11px;min-height:36px}
+ .action-dock .combat-btn.special{font-size:10px}
+ .action-dock .end-turn-overlay{min-height:48px;font-size:13px}
+ .action-dock #rollMoveBtn{font-size:12px;min-height:42px}
+ .controls{min-height:65px}
+}
+@media(max-width:430px){
+ .action-dock{flex-basis:121px;width:121px}
+ .action-dock .combat-btn{font-size:10px;min-height:35px}
+ .action-dock-title{font-size:10px}
+ .action-dock #rollMoveBtn{font-size:11px}
+ .action-dock .end-turn-overlay{font-size:12px}
+ .board-and-actions{height:clamp(325px,43dvh,410px);min-height:325px}
+}
+/* Keep End Turn visible in the initial viewport even if the dungeon is tall.
+   Less common combat actions scroll within the dock, not the whole page. */
+.action-dock{height:min(100%,345px);align-self:flex-start}
+@media(max-width:430px){.action-dock{height:min(100%,230px)}}
+
+/* v9 Candidate 5B — dedicated status to the LEFT of the map, actions to the right.
+   Core actions fit with no internal scrollbar, including compact laptop/tablet views. */
+.board-and-actions{gap:8px}
+.turn-dock{flex:0 0 136px;width:136px;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:10px 9px;background:linear-gradient(160deg,#1a3140,#0a1928);border:1px solid #ac986e;border-radius:12px;box-shadow:0 7px 22px #0005;min-height:0}
+.turn-dock-head{display:flex;flex-direction:column;align-items:center;gap:5px}
+.turn-dock-title{font-weight:800;color:#ebd3a0;font-size:10px;letter-spacing:.045em;text-align:center}
+.turn-clock{font:bold 30px/1 Georgia,serif;color:#ffe2a2;text-align:center;text-shadow:0 2px 11px #000a;font-variant-numeric:tabular-nums}
+.turn-dock .turn-banner{position:static;transform:none;display:block;max-width:none;white-space:normal;font-size:12px!important;font-weight:800;line-height:1.5;padding:10px 6px;border-radius:9px;text-align:center;background:#243f46;color:#bff3dd;border:1px solid #659b87;box-shadow:none;overflow-wrap:anywhere;}
+.turn-dock .turn-banner.waiting{background:#302d3b;color:#f4dbb1;border-color:#988265}
+.turn-dock .turn-dock-help{color:#b1c8c9;font-size:10px;line-height:1.35;text-align:center}
+.turn-dock #globalTurnStrip{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:stretch;margin:0;padding:7px 5px;gap:4px;background:#0f2432;border:1px solid #7f7659}
+.turn-dock #globalTurnStrip .turn-heading{font-size:10px;text-align:center;margin:0;white-space:normal}
+.turn-dock #globalTurnStrip .turn-step{padding:5px 4px;font-size:10px;text-align:center;line-height:1.1}
+.turn-dock #globalTurnStrip .turn-enemies{font-size:9px;font-weight:500;line-height:1.25;text-align:center}
+.action-dock{height:100%;align-self:stretch;overflow:visible;padding:8px 7px;gap:5px}
+.action-dock .combat-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(44px,auto));gap:5px;flex:1 1 auto;min-height:0;overflow:visible;align-items:stretch;scrollbar-width:none;padding:0}
+.action-dock .combat-btn{display:flex;align-items:center;justify-content:center;min-height:44px;height:auto;font-size:11px;line-height:1.17;padding:5px 3px;overflow-wrap:break-word;hyphens:auto;text-align:center}
+.action-dock .combat-btn.special{font-size:10px}
+.action-dock .dock-counter{font-size:10px}
+.action-dock .end-turn-overlay{min-height:47px;font-size:13px}
+@media(max-width:980px){.turn-dock{flex-basis:120px;width:120px;padding:8px 6px}.action-dock{flex-basis:145px;width:145px}}
+@media(max-width:760px){.turn-dock{flex-basis:121px;width:121px;padding:7px 5px;gap:6px}.turn-clock{font-size:24px}.turn-dock .turn-banner{font-size:11px!important;padding:6px 3px}.turn-dock .turn-dock-help{font-size:9px}.action-dock{flex-basis:138px;width:138px}.action-dock .combat-controls{grid-template-rows:repeat(3,minmax(40px,auto));gap:4px}.action-dock .combat-btn{min-height:40px;font-size:10px}.action-dock .combat-btn.special{font-size:9px}}
+@media(max-width:560px){
+ .board-and-actions{display:grid;height:auto;min-height:0;grid-template-columns:minmax(0,1fr) 125px;grid-template-areas:'status status' 'map actions';grid-template-rows:auto 345px;gap:6px}
+ .turn-dock{grid-area:status;width:100%;min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;gap:3px 7px;padding:6px 8px;min-height:0}
+ .turn-dock-head{flex-direction:row;gap:7px}.turn-dock-title{white-space:nowrap}.turn-clock{font-size:22px}
+ .turn-dock .turn-banner{justify-self:stretch;align-self:center;padding:4px;font-size:11px!important}
+ .turn-dock #globalTurnStrip{grid-column:1/-1;flex-direction:row;align-items:center;flex-wrap:wrap;padding:4px}
+ .turn-dock #globalTurnStrip .turn-heading{font-size:9px}
+ .turn-dock #globalTurnStrip .turn-step{font-size:9px;padding:3px}
+ .turn-dock #globalTurnStrip .turn-enemies{display:none}
+ .turn-dock .turn-dock-help{display:none}
+ .board-and-actions .canvas-wrap{grid-area:map;height:345px;min-height:345px}
+ .action-dock{grid-area:actions;width:125px;min-width:0;height:345px;min-height:0;align-self:stretch;padding:6px 4px;gap:4px}
+ .action-dock .combat-btn{font-size:9px;min-height:42px;padding:2px}
+ .action-dock .combat-btn.special{font-size:8px}
+ .action-dock #rollMoveBtn{font-size:10px;min-height:44px}
+ .action-dock .end-turn-overlay{font-size:12px;min-height:47px}
+}
+@media(max-width:360px){.board-and-actions{grid-template-columns:minmax(0,1fr) 116px}.action-dock{width:116px}}
+
+
+/* v9 Candidate 5C — private supervised beta chat, overlays without moving game controls. */
+.chat-launcher{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));z-index:69;background:#e0c27d;color:#172635;border:2px solid #f9df9d;padding:11px 16px;border-radius:999px;font-weight:800;font-size:14px;box-shadow:0 7px 25px #000a;min-height:46px;cursor:pointer}
+.chat-unread{display:inline-block;padding:1px 5px;border-radius:8px;background:#9b2937;color:white;font-size:10px;margin-left:5px}.chat-unread[hidden]{display:none}
+.chat-drawer{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 58px);z-index:69;display:flex;flex-direction:column;width:min(365px,calc(100vw - 24px));height:min(465px,calc(100dvh - 98px));background:#0b1a2b;color:#f2e4c5;border:2px solid #c3a367;border-radius:14px;box-shadow:0 12px 45px #000c;overflow:hidden}
+.chat-drawer[hidden]{display:none}
+.chat-header{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:10px 12px;background:#1d3543;border-bottom:1px solid #85734e}.chat-header strong{display:block;font-size:14px}.chat-header small{display:block;font-size:10px;color:#c4d5d4}.chat-header button{background:#293a48;border:1px solid #777;color:white;border-radius:7px;padding:6px 10px;font-weight:800}
+.chat-messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:9px 10px;display:flex;flex-direction:column;gap:7px}
+.chat-quiet{font-size:12px;color:#b5c6c9;margin:5px}.chat-line{background:#1b3140;border:1px solid #405866;border-radius:9px;padding:7px 9px;max-width:94%;align-self:flex-start;overflow-wrap:anywhere}.chat-line.chat-self{background:#203f35;border-color:#4b7664;align-self:flex-end}.chat-line-header{display:flex;gap:8px;align-items:baseline;justify-content:space-between;font-size:11px;color:#efd49a}.chat-line-header time{font-size:10px;color:#c6d0cf}.chat-text{font-size:13px;line-height:1.3;margin:5px 0;white-space:pre-wrap}.chat-report{border:0;background:none;text-decoration:underline;color:#e2c7a0;font-size:10px;padding:0;cursor:pointer}
+.chat-form{padding:8px 9px 5px;border-top:1px solid #5b675f}.chat-label{font-size:10px;color:#cbd6d5;display:block;margin-bottom:5px}.chat-compose{display:flex;gap:6px}.chat-compose input{flex:1;min-width:0;background:#172c3c;border:1px solid #718783;color:#fff;font:14px system-ui;border-radius:8px;padding:10px}.chat-compose button{background:#dfc17e;color:#172738;border:0;border-radius:8px;padding:9px 11px;font-weight:800;min-width:54px}.chat-compose button:disabled{opacity:.5}
+.chat-options{display:flex;align-items:center;gap:6px;padding:5px 9px 9px;flex-wrap:wrap;font-size:10px;color:#d2dddb}.chat-options select{background:#213645;color:#f4dfbb;border:1px solid #71817d;border-radius:5px;padding:5px;max-width:130px;flex:1}.chat-options button{background:#31434d;color:#f5ddae;border:1px solid #8d896e;border-radius:5px;padding:6px;font-size:10px}
+.chat-guidance{padding:5px 9px 8px;border-top:1px solid #344959;font-size:10px;color:#bdccd0;max-height:115px;overflow-y:auto}.chat-guidance summary{cursor:pointer;font-weight:750;color:#ecd5a3}.chat-guidance p{line-height:1.4;margin:5px}.chat-report-entry{border-bottom:1px solid #425a65;padding:5px 0}
+@media(max-width:560px){.chat-drawer{width:calc(100vw - 16px);right:8px;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 56px);height:min(420px,calc(100dvh - 100px))}.chat-launcher{right:10px;bottom:10px}.chat-compose input{font-size:16px}}
+
+/* Candidate 5C additions — enchantment effects are visible without hover. */
+.gear-description{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 180px}
+.enchant-effect{display:block;color:#9cdec2;font-size:11px;line-height:1.4;white-space:normal}
+.enchant-warning{display:block;color:#d8b77f;font-size:10px;line-height:1.4}
+/* Exit actions sit beside the west/east doorway on the map, including tablets. */
+.portal-arrow{position:absolute;z-index:6;display:flex;align-items:center;justify-content:center;width:40px;height:44px;background:linear-gradient(#f2d89a,#cda865);border:2px solid #fcebb9;border-radius:12px;color:#172d3d;font-size:26px;font-weight:900;box-shadow:0 3px 14px #000c;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+.portal-arrow[hidden]{display:none!important}
+.portal-arrow:disabled{opacity:.35;filter:grayscale(.4);box-shadow:none}
+.portal-arrow:focus-visible{outline:3px solid #8be9d2;outline-offset:2px}
+@media(hover:hover){.portal-arrow:not(:disabled):hover{background:#fff0bb;transform:scale(1.04)}}
+@media(max-width:760px){.portal-arrow{width:42px;height:46px;font-size:27px}}
+@media(max-width:430px){.portal-arrow{width:34px;height:40px;font-size:22px;border-radius:9px}}
+
+.chat-emoji-bar{display:flex;gap:4px;padding:6px 9px 0;flex-wrap:wrap;align-items:center}.chat-emoji{background:#203949;border:1px solid #4b6268;border-radius:7px;color:white;min-width:32px;min-height:32px;font-size:18px;cursor:pointer}.chat-emoji:focus-visible{outline:2px solid #efcf88}
+
+/* A small authored encounter briefing changes every room, without hiding controls. */
+.room-challenge {margin:5px 0 4px;color:#ead9ad;font-size:clamp(12px,1.2vw,14px);line-height:1.42;max-width:850px;}
+
+/* Personal consumable actions remain alongside enemy status, not over the dungeon. */
+#combatItemsList{display:grid;gap:7px}.supply-item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 8px;border:1px solid #355765;border-radius:8px;background:#172b3b}
+.supply-text{display:flex;flex-direction:column;gap:3px;min-width:0}.supply-text strong{font-size:12px;color:#f2dcaa}.supply-text small{font-size:10px;color:#b7cbc7;line-height:1.35}.supply-item button{flex:none;min-width:47px;min-height:38px}
+
+/* Endgame Maze — isolated from the campaign canvas and persistent inventory. */
+.maze-control-panel{border-color:#9f8452}
+.maze-control-panel .bag-action,.maze-actions button,.maze-directions button,#mazeSlotChoices button,#mazeRewardChoices button{margin:3px;padding:8px 10px;min-height:38px;border-radius:8px;border:1px solid #a58b59;background:#23374a;color:#f4e5c8;cursor:pointer}
+.maze-control-panel button:disabled{opacity:.45;cursor:not-allowed}
+.maze-map{position:relative;overflow:auto;min-height:270px;max-height:460px;border:1px solid #546d7b;border-radius:10px;background:#071321;padding:8px}
+.maze-map-grid{position:relative;min-width:360px;min-height:270px}
+.maze-node{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;box-sizing:border-box;background:#384759;border:1px solid #9eaeae;border-radius:5px;color:#f6f1d7;font:12px system-ui;transform:translate(-50%,-50%)}
+.maze-node.current{background:#bd9848;color:#152332;border:2px solid #fff3c6}
+.maze-node.boss{background:#704e77}
+.maze-map-line{position:absolute;background:#7a8a80;height:2px;transform-origin:0 50%}
+.maze-foe{display:flex;gap:8px;align-items:center;margin:4px 0;padding:5px;border-radius:6px;background:#202739}
+.maze-foe button{min-height:32px}
+.maze-danger{color:#ffb98a;font-weight:bold}
+
+/* Four-class beta creation: visible before selecting once; usable on tablets */
+.class-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 4px}
+.class-choice{padding:13px 12px;border:1px solid #b89e6b;border-radius:10px;background:#253d51;color:#f2e6c9;text-align:left;cursor:pointer;line-height:1.5;font-weight:650}
+.class-choice:focus-visible{outline:3px solid #f3cf83;outline-offset:2px}
+.class-choice:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:690px){.class-choice-grid{grid-template-columns:1fr}}
+
+/* Endgame boss arena: one logical coordinate per 7×7 tile. */
+.maze-arena{display:grid;grid-template-columns:repeat(7,minmax(26px,1fr));gap:3px;max-width:440px;margin:8px auto 14px;padding:8px;background:#0a1624;border:1px solid #5f728a;border-radius:11px}
+.maze-arena-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;min-height:36px;min-width:0;font-size:21px;color:#b8b9bc;border:1px solid #4c6675;background:#1b3244;border-radius:5px;cursor:pointer}
+.maze-arena-cell.danger{background:#9b342e;color:#fff5ca;border-color:#ffa998;box-shadow:inset 0 0 0 1px #ffcf76}
+.maze-arena-cell.fixture{color:#ffe7ac;border-color:#9b8041}
+.maze-arena-cell.hero{color:#fff3cf;background:#31596b;border-color:#b5e8ff}
+.maze-arena-cell.monarch{background:#5e355d;color:#fff1e6}
+.maze-arena-cell:disabled{cursor:default;opacity:1}
+.maze-boss-intro{font-size:.95rem;line-height:1.5;color:#e9d3a5}
+.maze-weak{color:#b4f6c5;font-weight:700}
+@media(max-width:430px){.maze-arena{padding:4px;gap:2px}.maze-arena-cell{min-height:28px;font-size:18px}}
+
+/* V1 Release 1 — accessible seat switcher and pre-adventure character registration */
+.local-seats{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px;color:#cbd6d7}.local-seats[hidden]{display:none}.local-seats>div{display:flex;gap:5px;flex-wrap:wrap}.seat-button{padding:7px 9px;border:1px solid #718292;border-radius:8px;background:#1a3245;color:#ecddbe}.seat-button.selected{background:#c3a36b;color:#091728;border-color:#f2d29a;font-weight:800}.seat-button.needs-setup:not(.selected){border-color:#a88465}.character-overlay[hidden]{display:none}.character-overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:110;padding:20px;background:#030a14ed;overflow:auto}.character-dialog{width:min(500px,100%);padding:clamp(20px,4vw,36px);border:2px solid #c5a36b;border-radius:16px;background:linear-gradient(140deg,#1f3547,#101c30);box-shadow:0 25px 85px #000c}.character-dialog h2{font:700 28px Georgia,serif;color:#f5d692;margin:7px 0 12px}.character-dialog p{color:#bfced4;line-height:1.6}.character-dialog label{display:block;font-weight:750;color:#e2c58b;margin:14px 0 6px}.character-dialog input,.character-dialog select{width:100%;border:1px solid #97805b;border-radius:9px;background:#091a2b;color:#f5e6c6;font-size:16px;padding:12px}.character-dialog button{margin-top:18px;padding:13px 16px;border:0;border-radius:8px;background:#dfbb75;color:#101a26;font-weight:800;width:100%}.class-permanent{font-size:12px}.setup-error{color:#ffb3aa;margin-top:12px}.setup-error[hidden]{display:none}@media(max-width:1050px){.masthead{height:auto;min-height:76px;flex-wrap:wrap;gap:10px}.local-seats{order:3;width:100%}.workspace{min-height:0}}@media(max-width:760px){.local-seats{font-size:11px}.seat-button{padding:7px 8px}.character-dialog h2{font-size:23px}}
