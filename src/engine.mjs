@@ -1,4 +1,5 @@
 import {PLAYABLE_QUESTS} from './campaign.mjs';
+import {QUEST_TIERS,normalizedCompletions,unlockedQuestCeiling,questIsUnlocked,migrateLegacyCompletions} from './quest-progression.mjs';
 import {HARD_ENCOUNTERS} from './hard-encounters.mjs';
 import {HARD_BLUEPRINTS} from './hard-rooms.mjs';
 import {EXTREME_ENCOUNTERS} from './extreme-encounters.mjs';
@@ -592,6 +593,8 @@ const TIER_NAMES=['Common','Uncommon','Rare','Legendary','Mythic','Exotic'];
 function weighted(list,random){let r=random();for(const value of list){r-=value.p;if(r<0)return value}return list.at(-1)}
 function ensureProgress(player){
   player.level??=1;player.xp??=0;player.gold??=0;
+  player.completedQuests=normalizedCompletions(player.completedQuests);
+  player.unlockedQuest=unlockedQuestCeiling(player.completedQuests);
   // Existing saved character progress survives upgrades without being reset.
   player.level=Math.min(LEVEL_CAP,Math.max(1,Math.floor(player.level)));
   if(!Number.isFinite(player.xp)||player.xp<0)player.xp=0;
@@ -849,18 +852,19 @@ export function refreshMerchant(s,random=Math.random){
    s.legendaryMerchantOffer={sku:offer.sku,remaining:1};
  }
 }
-export function merchantStock(s){const tier=s.unlockedQuest||1;return SHOP_STOCK.filter(item=>{if((item.unlock||1)>tier)return false;if(item.kind!=='equipment')return true;if(tier>=13){if(!['Legendary','Mythic','Exotic'].includes(item.rarity))return false;if(item.rarity==='Exotic')return s.exoticMerchantOffer?.sku===item.sku&&s.exoticMerchantOffer.remaining>0;return true;}if(tier>=10){if(['Common','Uncommon'].includes(item.rarity))return false;if(item.rarity==='Mythic')return s.mythicMerchantOffer?.sku===item.sku&&s.mythicMerchantOffer.remaining>0;return true;}return item.rarity!=='Legendary'||(s.legendaryMerchantOffer?.sku===item.sku&&s.legendaryMerchantOffer.remaining>0);});}
+export function merchantStock(s,viewerId=null){const tier=viewerId&&s.players?.[viewerId]?unlockedQuestCeiling(s.players[viewerId].completedQuests):s.unlockedQuest||1;return SHOP_STOCK.filter(item=>{if((item.unlock||1)>tier)return false;if(item.kind!=='equipment')return true;if(tier>=13){if(!['Legendary','Mythic','Exotic'].includes(item.rarity))return false;if(item.rarity==='Exotic')return s.exoticMerchantOffer?.sku===item.sku&&s.exoticMerchantOffer.remaining>0;return true;}if(tier>=10){if(['Common','Uncommon'].includes(item.rarity))return false;if(item.rarity==='Mythic')return s.mythicMerchantOffer?.sku===item.sku&&s.mythicMerchantOffer.remaining>0;return true;}return item.rarity!=='Legendary'||(s.legendaryMerchantOffer?.sku===item.sku&&s.legendaryMerchantOffer.remaining>0);});}
 export function buyFromShop(s,id,sku,now=nowMs()){
  const p=readyPlayer(s,id);requireNoFight(s,p);
  if(p.room!=='camp')throw new Error('Visit the merchant in Adventurers’ Camp');
  const stock=SHOP_STOCK.find(x=>x.sku===sku);if(!stock)throw new Error('Unknown merchant item');
- if((stock.unlock||1)>(s.unlockedQuest||1))throw new Error('That stock is not unlocked yet');
- if(!merchantStock(s).some(item=>item.sku===stock.sku))throw new Error('This item is not stocked by the merchant right now');
+ const playerTier=unlockedQuestCeiling(p.completedQuests);
+ if((stock.unlock||1)>playerTier)throw new Error('That stock is not unlocked yet');
+ if(!merchantStock(s,id).some(item=>item.sku===stock.sku))throw new Error('This item is not stocked by the merchant right now');
  const cost=classPrice(p,stock,(s.cityDistricts||[]).includes('q12r2'));
  if(p.gold<cost)throw new Error('Not enough gold');
  p.gold-=cost;
- if(stock.rarity==='Legendary'&&(s.unlockedQuest||1)<10)s.legendaryMerchantOffer.remaining--;
- if(stock.rarity==='Mythic'&&(s.unlockedQuest||1)<13)s.mythicMerchantOffer.remaining--;
+ if(stock.rarity==='Legendary'&&playerTier<10)s.legendaryMerchantOffer.remaining--;
+ if(stock.rarity==='Mythic'&&playerTier<13)s.mythicMerchantOffer.remaining--;
  if(stock.rarity==='Exotic')s.exoticMerchantOffer.remaining--;
  if(stock.kind==='potion')p.inventory.potions.push({id:itemId(p,'potion'),kind:'potion',name:'Healing Potion',charges:1});
  else if(stock.kind==='consumable')p.inventory.consumables.push({id:itemId(p,'consumable'),kind:'consumable',sku:stock.sku,effect:stock.effect,name:stock.name,charges:1});
@@ -921,7 +925,7 @@ export function freshState(now=nowMs()){
   for(const [id,def] of Object.entries(ROOM_DATA)){
     rooms[id]={id,discovered:id==='woodland',battle:{status:def.encounter.length?'dormant':'none',round:0,deadline:null,actions:{},eligibleRound:{},enemies:[]}};
   }
-  return {turn:{round:1,ended:{},eligibleRound:{},deadline:now+ROUND_MS},version:8,epoch:now,revision:0,unlockedQuest:1,completedQuests:[],questRewardOffers:{},questRewardClaimed:{},legendaryMerchantOffer:null,mythicMerchantOffer:null,exoticMerchantOffer:null,events:[],nextEventId:1,players:{},rooms,log:[{at:now,text:'A Roll in the Woods begins. Find your friends and explore.'}]};
+  return {turn:{round:1,ended:{},eligibleRound:{},deadline:now+ROUND_MS},version:8,progressionVersion:2,epoch:now,revision:0,unlockedQuest:1,completedQuests:[],questRewardOffers:{},questRewardClaimed:{},legendaryMerchantOffer:null,mythicMerchantOffer:null,exoticMerchantOffer:null,events:[],nextEventId:1,players:{},rooms,log:[{at:now,text:'A Roll in the Woods begins. Find your friends and explore.'}]};
 }
 function addLog(s,text,now){s.log.push({at:now,text});if(s.log.length>35)s.log=s.log.slice(-35)}
 function emitEvent(s,type,payload,at){s.events??=[];s.nextEventId??=1;s.events.push({id:s.nextEventId++,type,...payload,at});s.events=s.events.slice(-40)}
@@ -951,7 +955,26 @@ export function ensureWorld(s){
     const final=Object.entries(ROOM_DATA).find(([id,meta])=>meta.quest===q&&meta.final)?.[0];
     if(final&&s.rooms[final]?.battle.status==='cleared'&&!s.completedQuests.includes(q))s.completedQuests.push(q);
   }
-  s.unlockedQuest=Math.max(s.unlockedQuest||1,1,...s.completedQuests.map(q=>Math.min(15,q+1)));
+  // Existing V1 saves used a shared sequential unlock counter. Migrate it once,
+  // granting existing characters their earned prior access without changing
+  // levels, gear, bookmarks or saves. A NEW player joining after migration
+  // starts their own Beginner progression rather than inheriting world credit.
+  if(s.progressionVersion!==2){
+    const legacyCompleted=migrateLegacyCompletions(s.completedQuests,s.unlockedQuest);
+    for(const p of Object.values(s.players||{})){
+      p.completedQuests=normalizedCompletions(p.completedQuests??legacyCompleted);
+      p.unlockedQuest=unlockedQuestCeiling(p.completedQuests);
+    }
+    s.completedQuests=legacyCompleted;
+    s.progressionVersion=2;
+  }
+  s.completedQuests=normalizedCompletions(s.completedQuests);
+  s.unlockedQuest=unlockedQuestCeiling(s.completedQuests);
+  for(const p of Object.values(s.players||{})){
+    if(!Array.isArray(p.completedQuests))p.completedQuests=[];
+    p.completedQuests=normalizedCompletions(p.completedQuests);
+    p.unlockedQuest=unlockedQuestCeiling(p.completedQuests);
+  }
 }
 /** Remember the last SAFE square in each quest; this is per-player and
  * survives camp visits, quest switching and browser reconnects. */
@@ -968,7 +991,7 @@ export function resumeQuest(s,id,now=nowMs()){
  const p=readyPlayer(s,id);ensureWorld(s);
  if(p.room!=='camp')throw new Error('Return to camp before resuming a quest');
  const quest=p.lastCampQuest;
- if(!Number.isInteger(quest)||quest<1||quest>(s.unlockedQuest||1))throw new Error('No unfinished quest to resume');
+ if(!questIsUnlocked(p.completedQuests,quest))throw new Error('No unfinished quest to resume');
  return enterQuest(s,id,quest,now);
 }
 /** Move to the entrance of an unlocked quest. The lab keeps previously cleared rooms
@@ -977,7 +1000,7 @@ export function resumeQuest(s,id,now=nowMs()){
 export function enterQuest(s,id,quest,now=nowMs()){
   const p=readyPlayer(s,id);
   ensureWorld(s);
-  if(!Number.isInteger(quest)||quest<1||quest>15||quest>s.unlockedQuest)throw new Error('This quest is not unlocked in the multiplayer beta');
+  if(!questIsUnlocked(p.completedQuests,quest))throw new Error('This difficulty tier is not unlocked for this character');
   if(s.rooms[p.room].battle.status==='active')throw new Error('Cannot change quests during combat');
   if(p.hp<=0)throw new Error('Downed players cannot travel to another quest');
   if(p.room!=='camp'&&ROOM_DATA[p.room]?.quest!==quest)saveQuestBookmark(p);
@@ -1008,7 +1031,15 @@ export function voteFinishQuest(s,id,now=nowMs()){
  if(!landing)throw new Error('The camp is full');
  p.room='camp';p.x=landing.x;p.y=landing.y;
  p.moveRemaining=0;p.moveRound=null;p.movementRolled=false;
- delete p.questBookmarks?.[def.quest];if(p.lastCampQuest===def.quest)p.lastCampQuest=null;
+  // A player joining after the shared boss was defeated can still earn their
+  // own quest credit by reaching the cleared final exit. Otherwise new players
+  // would be unable to progress through a world with already-cleared bosses.
+  const before=unlockedQuestCeiling(p.completedQuests);
+  if(!p.completedQuests.includes(def.quest))p.completedQuests.push(def.quest);
+  p.completedQuests=normalizedCompletions(p.completedQuests);
+  p.unlockedQuest=unlockedQuestCeiling(p.completedQuests);
+  if(p.unlockedQuest>before)addLog(s,`${p.name} unlocked all quests in ${QUEST_TIERS.find(t=>t.max===p.unlockedQuest)?.name||'the next difficulty'} difficulty.`,now);
+  delete p.questBookmarks?.[def.quest];if(p.lastCampQuest===def.quest)p.lastCampQuest=null;
  s.rooms.camp.discovered=true;
  addLog(s,`${p.name} finished Quest ${def.quest} and returned to the camp merchant.`,now);
  emitEvent(s,'return-camp',{quest:def.quest,players:[id]},now);
@@ -1034,7 +1065,7 @@ export function returnToCamp(s,id,now=nowMs()){
  */
 export function replayQuest(s,id,quest,now=nowMs()){
  const p=readyPlayer(s,id);ensureWorld(s);requireNoFight(s,p);
- if(!s.completedQuests.includes(quest)||!Number.isInteger(quest)||quest<1||quest>15)throw new Error('Finish this quest before replaying it');
+ if(!p.completedQuests.includes(quest)||!Number.isInteger(quest)||quest<1||quest>15)throw new Error('Finish this quest before replaying it');
  const rooms=Object.keys(ROOM_DATA).filter(r=>ROOM_DATA[r].quest===quest);
  if(Object.values(s.players).some(hero=>rooms.includes(hero.room)))throw new Error('All adventurers must leave this quest before it can be replayed');
  for(const player of Object.values(s.players)){delete player.questBookmarks?.[quest];if(player.lastCampQuest===quest)player.lastCampQuest=null;}
@@ -1669,13 +1700,27 @@ export function resolveRound(s,roomId,now=nowMs(),random=Math.random){
     }
     if(def.final){
       s.completedQuests??=[];if(!s.completedQuests.includes(def.quest))s.completedQuests.push(def.quest);
-      const was=s.unlockedQuest||1;s.unlockedQuest=Math.max(was,Math.min(15,def.quest+1));
-      // Only the transition into Medium and Medium-tier bosses can restock a Legendary.
-      // Replaying Beginner/Easy bosses cannot farm the rare-merchant roll.
+      const was=s.unlockedQuest||1;s.unlockedQuest=unlockedQuestCeiling(s.completedQuests);
+      const unlockedFor={};
+      // Credit only the characters who participated. Other players retain
+      // individual progression, even when they share the same saved world.
+      for(const id of Object.keys(b.participated||{}).filter(id=>s.players[id])){
+        const hero=s.players[id],before=unlockedQuestCeiling(hero.completedQuests);
+        hero.completedQuests=normalizedCompletions([...hero.completedQuests,def.quest]);
+        hero.unlockedQuest=unlockedQuestCeiling(hero.completedQuests);
+        if(hero.unlockedQuest>before){
+          unlockedFor[id]=QUEST_TIERS.find(t=>t.max===hero.unlockedQuest)?.name||'next';
+          addLog(s,`${hero.name} unlocked all quests in ${unlockedFor[id]} difficulty.`,now);
+        }
+      }
+      // Tier transitions may now be triggered by ANY final quest in a tier,
+      // not necessarily its highest-numbered quest. Preserve the established
+      // rare-merchant reroll after eligible higher-tier bosses as well.
       const merchantTier=s.unlockedQuest||1;
-      if(def.quest>=(merchantTier>=13?12:merchantTier>=10?9:4))refreshMerchant(s,random);
-      addLog(s,`QUEST ${def.quest} COMPLETE!${s.unlockedQuest>was?' Quest '+s.unlockedQuest+' unlocked.':''}`,now);
-      emitEvent(s,'quest-complete',{quest:def.quest,room:roomId,next:s.unlockedQuest>was?s.unlockedQuest:null},now);
+      const eligibleBoss=def.quest>=(merchantTier>=13?12:merchantTier>=10?9:4);
+      if((s.unlockedQuest>was&&merchantTier>=5)||eligibleBoss)refreshMerchant(s,random);
+      addLog(s,`QUEST ${def.quest} COMPLETE!${s.unlockedQuest>was?' The next difficulty tier is now available to eligible heroes.':''}`,now);
+      emitEvent(s,'quest-complete',{quest:def.quest,room:roomId,next:s.unlockedQuest>was?s.unlockedQuest:null,unlockedFor},now);
       for(const id of Object.keys(b.participated||{}).filter(id=>s.players[id])){
         const player=s.players[id];player.gold=(player.gold||0)+([0,12,22,35,50,65,80,95,115,135,170,210,260,330,420,600][def.quest]||0);
         awardXp(player,([0,10,18,24,32,40,46,52,60,66,85,100,120,145,180,240][def.quest]||0),s,now);
@@ -1933,7 +1978,13 @@ export function publicState(s,viewerId){
  delete snapshot.mazeRuns;delete snapshot.lastMazeBoss;
  snapshot.questRewardOffers=Object.fromEntries(Object.entries(s.questRewardOffers||{}).filter(([key])=>key.startsWith(viewerId+':')));
  delete snapshot.questRewardClaimed;snapshot.roomDefinitions=ROOM_DATA;snapshot.shopStock=SHOP_STOCK;snapshot.roomWalls=ROOM_WALLS;snapshot.roomHazards=HARD_HAZARDS;snapshot.roomLanterns=ABYSS_LANTERNS;
-  snapshot.shopStock=merchantStock(s).map(item=>({...item,cost:classPrice(s.players[viewerId],item,(s.cityDistricts||[]).includes('q12r2'))}));
+  snapshot.shopStock=merchantStock(s,viewerId).map(item=>({...item,cost:classPrice(s.players[viewerId],item,(s.cityDistricts||[]).includes('q12r2'))}));
+  // Quest board and maze UI see the VIEWER'S completion history, not the
+  // aggregate world progress or another character's advanced unlocks.
+  const viewer=s.players[viewerId];
+  snapshot.completedQuests=normalizedCompletions(viewer?.completedQuests);
+  snapshot.unlockedQuest=unlockedQuestCeiling(snapshot.completedQuests);
+  snapshot.questTiers=QUEST_TIERS.map(t=>({name:t.name,quests:t.quests,complete:t.quests.filter(q=>snapshot.completedQuests.includes(q)).length,unlocked:t.min<=snapshot.unlockedQuest}));
   snapshot.turn.activePlayer=globalActivePlayer(s);
   for(const [roomId,room] of Object.entries(snapshot.rooms)){if(room.battle.status==='active')room.battle.activePlayer=globalActivePlayer(s);}
   for(const p of Object.values(snapshot.players)){
@@ -1941,7 +1992,7 @@ export function publicState(s,viewerId){
     // Each connection may see shared positions, combat stats and HP, but never
     // another player's private inventory or one-time treasure claims.
     if(p.id!==viewerId){
-      delete p.inventory;delete p.equipped;delete p.lootClaimed;
+      delete p.inventory;delete p.equipped;delete p.lootClaimed;delete p.completedQuests;delete p.unlockedQuest;
       delete p.gold;delete p.wardCharges;delete p.superRoom;delete p.specialUsedAt;delete p.trainingRackClaimed;delete p.questBookmarks;delete p.lastCampQuest;
     }
   }

@@ -29,7 +29,7 @@ function randomRarity(depth,random){const value=random();return depth<8?(value<.
 export function createMaze(s,id,slot,seed,now=stamp()){
  progress(s);const p=account(s,id);if(id!=='one')throw new Error('Only the host can create a Maze expedition');
  if(!Number.isInteger(slot)||slot<1||slot>3)throw new Error('Choose save slot 1, 2 or 3');
- if(!s.completedQuests?.includes(15))throw new Error('Complete Quest 15 to unlock the Endgame Maze');
+ if(!p.completedQuests?.includes(15))throw new Error('Complete Quest 15 to unlock the Endgame Maze');
  if(p.mazeSlot)throw new Error('Leave your current Maze before starting another');inCamp(s,p);
  const old=s.mazeRuns[slot];if(old&&old.status==='active')throw new Error('This Maze is in progress; rejoin it instead');
  if(old&&old.status==='active'&&active(s,old).length)throw new Error('All players must leave first');
