@@ -1,4 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
+import {mazeLabRoomKey,provisionMazeLabPlayer,grantMazeLabEquipment} from './maze-lab.mjs';
 import {localHistory,newLocalAdventure,resumeLocalAdventure,activeLocalAdventure,localRoomKey,seatPermitted} from './local-adventures.mjs';
 import {createMaze,joinMaze,leaveMaze,mazeTravel,mazeSearch,mazeClaim,mazeBonus,mazeAction,mazeRetreat,mazeReward,mazeVoteAbandon,mazeTick,nextMazeDeadline,mazePublic,resumeMazeClock} from './maze-play.mjs';
 import {ensureChat,chatForViewer,postChat,togglePersonalMute,reportChat,toggleAdminMute} from './chat.mjs';
@@ -62,6 +63,7 @@ function landingScreen(identity,history){
   </style></head><body><main><header><div class="eyebrow">The original tactical dice adventure</div><h1>🎲 DICEBOUND</h1><p>Choose how your party enters the dungeon</p></header>
   <div class="modes"><section class="mode"><div class="mode-icon">🎮</div><h2>Local multiplayer</h2><p>Up to four adventurers, sharing one screen. Pass control to the next player when it is their turn. This mode has its own save world.</p>${isHost?`<div class="local-choices"><form action="${ROOT}/api/local-adventure" method="POST"><input type="hidden" name="action" value="new"><h3>Start a NEW adventure</h3><p><small>Everyone begins together with new characters. Your earlier local saves are preserved for Resume.</small></p><label for="seats">Number of players</label><select id="seats" name="seats"><option value="1">1 player</option><option value="2">2 players</option><option value="3">3 players</option><option value="4" selected>4 players</option></select><button type="submit">Start new adventure</button></form><form action="${ROOT}/api/local-adventure" method="POST"><input type="hidden" name="action" value="resume"><h3>RESUME saved adventure</h3><label for="adventure">Choose a saved game</label><select id="adventure" name="adventure">${previous}</select><label for="legacySeats">Players (only for the existing beta save)</label><select id="legacySeats" name="legacySeats">${[1,2,3,4].map(n=>`<option value="${n}" ${local.games[0].seats===n?'selected':''}>${n} player${n===1?'':'s'}</option>`).join('')}</select><button type="submit">Resume adventure</button></form></div>`:'<p><small>Local host access is managed by Player One (the supervising adult).</small></p>'}</section>
   <section class="mode"><div class="mode-icon">🌐</div><h2>Online multiplayer</h2><p>Up to four players on separate devices. Each approved player uses their personal reusable access code. The six-boss Maze is included in this game mode.</p><a href="${ROOT}/play?mode=online">Enter online game</a></section></div>
+  <div class="note" style="border-color:#ba9556"><strong>🧪 Endgame Maze Lab · isolated test adventure</strong><p>Test the complete six-boss Maze now, without completing Quest 15. These are separate Level 25 test characters; nothing transfers to your saved campaign. Parent/host creates the Maze in Save 1; friends can join from their own devices.</p><p><a style="color:#efcf86" href="${ROOT}/play?mode=online&mazeLab=1">Open ONLINE Maze Lab</a>${isHost&&activeLocalAdventure(local)?` · <a style="color:#efcf86" href="${ROOT}/play?mode=local&seats=${activeLocalAdventure(local).seats}&mazeLab=1">Open LOCAL Maze Lab (${activeLocalAdventure(local).seats} players)</a>`:''}</p></div>
   <div class="note"><strong>Private development beta</strong><p>V1 at <strong>/dicebound/</strong> is unaffected. Keep multiplayer supervised; adult-managed friend identities and safety controls are being developed. Do not share invitation codes publicly.</p></div>
   <footer>Signed in as ${identity.id==='one'?'Player One':identity.id==='two'?'Player Two':identity.id==='three'?'Player Three':'Player Four'} · <a style="color:#e4bd77" href="${ROOT}/">Choose mode</a><form class="exit" action="${ROOT}/api/logout" method="POST"><button type="submit">Sign out</button></form></footer></main></body></html>`;
 }
@@ -108,17 +110,22 @@ export default {
     if(req.method==='GET'&&u.pathname===ROOT+'/api/ws'){
       if(req.headers.get('upgrade')?.toLowerCase()!=='websocket')return reply('Upgrade required',426);
       const isTrial=u.searchParams.get('trial')==='balance-v9';
+      const isMazeLab=u.searchParams.get('mazeLab')==='1';
       const mode=u.searchParams.get('mode')==='local'?'local':'online';
       const seat=u.searchParams.get('seat')||'one';
       const localGame=mode==='local'?activeLocalAdventure(await signedLocalHistory(req,env)):null;
       if(mode==='local'&&(identity.id!=='one'||!seatPermitted(localGame,seat)))return reply('Choose a new or saved local adventure on the landing page.',403);
       const activeId=mode==='local'?seat:identity.id;
       const roomKey=mode==='local'?localRoomKey(localGame):isTrial?'quest-v9-balance-trial':'quest-01-two-player-prototype';
-      const object=env.GAME_ROOM.get(env.GAME_ROOM.idFromName(roomKey));
+      const selectedRoomKey=isMazeLab?mazeLabRoomKey(mode,mode==='local'?roomKey:''):roomKey;
+      const object=env.GAME_ROOM.get(env.GAME_ROOM.idFromName(selectedRoomKey));
       const headers=new Headers(req.headers);
+      // Never trust a client-supplied lab flag. Only this authenticated route sets it.
+      headers.delete('x-dicebound-maze-lab');
       headers.set('x-dicebound-player',activeId);
       headers.set('x-dicebound-name',mode==='local'?`Local Player ${['one','two','three','four'].indexOf(activeId)+1}`:identity.name);
       if(isTrial)headers.set('x-dicebound-trial','balance-v9');
+      if(isMazeLab)headers.set('x-dicebound-maze-lab','yes');
       return object.fetch(new Request('https://game-internal/connect',{headers}));
     }
     if(req.method!=='GET'&&req.method!=='HEAD')return reply('Method not allowed',405);
@@ -158,7 +165,12 @@ export class GameRoom extends DurableObject {
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment({id});
     if(req.headers.get('x-dicebound-trial')==='balance-v9')this.game.balanceTrial=true;
-    ensurePlayer(this.game,id,req.headers.get('x-dicebound-name'),null);resumeMazeClock(this.game,id);
+    ensurePlayer(this.game,id,req.headers.get('x-dicebound-name'),null);
+    if(req.headers.get('x-dicebound-maze-lab')==='yes'){
+      this.game.mazeLab=true;provisionMazeLabPlayer(this.game,id);
+      if(this.game.players[id].classChosen)grantMazeLabEquipment(this.game,id);
+    }
+    resumeMazeClock(this.game,id);
     this.announce(`${this.game.players[id].name} joined the adventure.`);
     await this.persist(null);
     this.broadcast();
@@ -231,8 +243,8 @@ export class GameRoom extends DurableObject {
       else if(packet.type==='action'){if(packet.action?.type==='move')throw new Error('Use dice movement');result=submitSequentialAction(this.game,id,packet.action);}
       else if(packet.type==='claim')result=claimLoot(this.game,id,packet.slot);
       else if(packet.type==='claim-quest-reward')result=claimQuestReward(this.game,id,packet.quest,packet.category);
-      else if(packet.type==='class-select')result=selectClass(this.game,id,packet.klass);
-      else if(packet.type==='character-create')result=createCharacter(this.game,id,packet.name,packet.klass);
+      else if(packet.type==='class-select'){result=selectClass(this.game,id,packet.klass);if(this.game.mazeLab)grantMazeLabEquipment(this.game,id);}
+      else if(packet.type==='character-create'){result=createCharacter(this.game,id,packet.name,packet.klass);if(this.game.mazeLab)grantMazeLabEquipment(this.game,id);}
       else if(packet.type==='equip')result=equipItem(this.game,id,packet.itemId,packet.slot||null);
       else if(packet.type==='training-rack')result=claimTrainingRack(this.game,id);
       else if(packet.type==='enter-quest')result=enterQuest(this.game,id,packet.quest);
