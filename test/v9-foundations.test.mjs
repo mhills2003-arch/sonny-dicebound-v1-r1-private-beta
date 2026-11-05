@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -47,7 +48,7 @@ test('combat movement D6 is independent of combat action and is rolled once per 
 });
 test('abandoned mine starts with real enemies, not an empty contradictory encounter',()=>{
  assert.equal(ROOM_DATA.q2r1.foes.length,2);
- const s=game();s.unlockedQuest=2;enterQuest(s,'one',2,T);
+ const s=game();grantTestTier(s,2);enterQuest(s,'one',2,T);
  assert.equal(s.rooms.q2r1.battle.status,'active');assert.equal(s.rooms.q2r1.battle.enemies.length,2);
 });
 test('quest-specific rarity ceilings exclude every Legendary in first four quests',()=>{
@@ -109,7 +110,7 @@ test('quest victory produces a milestone and unlocks the next quest',()=>{
  const s=game(),b=s.rooms.watchpost.battle;b.status='active';b.round=1;b.participated={one:true};b.damageBy={one:8};b.eligibleRound={one:1};b.enemies=[{id:'d8',hp:0,maxHp:8}];
  resolveRound(s,'watchpost',T,()=>.5);
  const event=s.events.find(e=>e.type==='quest-complete');
- assert.equal(event.quest,1);assert.equal(event.next,2);assert.equal(s.unlockedQuest,2);
+ assert.equal(event.quest,1);assert.equal(event.next,4);assert.equal(s.unlockedQuest,4);
 });
 test('quest exit requires defeated boss and actual physical proximity to east exit',()=>{
  const s=game(),p=s.players.one;p.room='watchpost';
@@ -176,7 +177,7 @@ test('room treasure cannot be farmed from the merchant camp',()=>{
 });
 test('explicit quest replay resets room enemies and personal treasure but preserves character XP',async()=>{
  const {replayQuest}=await import('../src/engine.mjs');
- const s=game(),p=s.players.one;s.completedQuests=[1];s.unlockedQuest=2;
+ const s=game(),p=s.players.one;s.completedQuests=[1];mirrorWorldProgress(s);grantTestTier(s,2);
  s.rooms.clearing.battle.status='cleared';s.rooms.watchpost.battle.status='cleared';
  p.room='camp';p.x=1;p.y=3;p.level=3;p.xp=73;p.gold=200;
  p.lootClaimed.woodland={equipment:true};p.lootClaimed.clearing={coin:true};
@@ -186,11 +187,11 @@ test('explicit quest replay resets room enemies and personal treasure but preser
  assert.equal(s.rooms.watchpost.battle.status,'dormant');
  assert.equal(p.lootClaimed.woodland,undefined);assert.equal(p.lootClaimed.clearing,undefined);
  assert.equal(p.level,3);assert.equal(p.xp,73);assert.equal(p.gold,200);
- assert(s.completedQuests.includes(1));assert.equal(s.unlockedQuest,2);
+ assert(s.completedQuests.includes(1));assert.equal(s.unlockedQuest,4);
 });
 test('replaying a quest cannot delete an active teammate encounter',async()=>{
  const {replayQuest}=await import('../src/engine.mjs');
- const s=game(['one','two']);s.completedQuests=[1];s.unlockedQuest=2;
+ const s=game(['one','two']);s.completedQuests=[1];mirrorWorldProgress(s);grantTestTier(s,2);
  s.players.one.room='camp';s.players.two.room='clearing';
  assert.throws(()=>replayQuest(s,'one',1,T),/All adventurers must leave/i);
 });
@@ -213,7 +214,7 @@ test('level-up celebration carries the amount each attribute increased',()=>{
  assert(s.players.one.gold>0,'level income must be added');
 });
 test('Quest 4 finale has enhanced Large-Shiny defence and a real second boss wave',()=>{
- const s=game();s.unlockedQuest=4;enterQuest(s,'one',4,T);
+ const s=game();grantTestTier(s,4);enterQuest(s,'one',4,T);
  const p=s.players.one;p.room='q4r4';p.x=8;p.y=3;s.rooms.q4r4.battle.status='cleared';
  rollMovement(s,'one',T,()=>.999);move(s,'one','E',T);
  const b=s.rooms.q4r5.battle;

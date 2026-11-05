@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,ROOM_DATA,SHOP_STOCK,RARITY_DICE,QUEST_MAX_RARITY,equipmentRarity,claimLoot,buyFromShop,resaleValue,merchantStock,refreshMerchant,MEDIUM_LEGENDARY_CHANCE} from '../src/engine.mjs';
@@ -32,7 +33,7 @@ test('a completed-boss Medium merchant refresh has ONE at-most-5% Legendary offe
  const cases=[['sword-legendary',400,'Sword'],['bow-legendary',400,'Bow'],['mace-legendary',500,'Mace']];
  const s=fresh(),p=s.players.one;p.room='camp';p.gold=2500;
  assert.throws(()=>buyFromShop(s,'one','sword-legendary',T),/not unlocked/i);
- s.unlockedQuest=5;
+ grantTestTier(s,5);
  assert.equal(merchantStock(s).some(x=>x.rarity==='Legendary'),false);
  assert.throws(()=>buyFromShop(s,'one','sword-legendary',T),/not stocked/i);
  for(let i=0;i<1000;i++){

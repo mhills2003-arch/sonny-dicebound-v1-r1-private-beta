@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -96,7 +97,7 @@ test('legacy characters are migrated without resetting equipment, XP or complete
  assert.equal(merchantStock(s).filter(x=>x.rarity==='Legendary').length,0);
 });
 test('Legendary stock is at most one single-use merchant offer after a 5% refresh',()=>{
- const {s,p}=game();s.unlockedQuest=5;
+ const {s,p}=game();grantTestTier(s,5);
  refreshMerchant(s,()=>.500);assert.equal(merchantStock(s).filter(x=>x.rarity==='Legendary').length,0);
  let k=0;refreshMerchant(s,()=>[.049,.999][k++]);
  const stock=merchantStock(s).filter(x=>x.rarity==='Legendary');assert.equal(stock.length,1);

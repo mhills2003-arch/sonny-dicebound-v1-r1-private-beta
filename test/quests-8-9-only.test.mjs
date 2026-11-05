@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -6,7 +7,7 @@ import {MEDIUM_BRIDGE_BLUEPRINTS} from '../src/level-designs.mjs';
 import {PLAYABLE_QUESTS} from '../src/campaign.mjs';
 const T=1800000000000;
 const catalog=JSON.parse(readFileSync(new URL('../public/campaign-catalog.json',import.meta.url))).quests;
-const setup=(quest=8)=>{const s=freshState(T);ensurePlayer(s,'one','Tester');s.unlockedQuest=quest;s.completedQuests=Array.from({length:quest-1},(_,i)=>i+1);s.players.one.room='camp';return s;};
+const setup=(quest=8)=>{const s=freshState(T);ensurePlayer(s,'one','Tester');grantTestTier(s,quest);s.completedQuests=Array.from({length:quest-1},(_,i)=>i+1);s.players.one.room='camp';return s;};
 const walkable=id=>{const {width:w,height:h}=roomSize(id),sy=doorRow(id),q=[[0,sy]],visited=new Set([`0,${sy}`]);for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){const key=nx+','+ny;if(nx>=0&&nx<w&&ny>=0&&ny<h&&!isWall(id,nx,ny)&&!visited.has(key)){visited.add(key);q.push([nx,ny]);}}}return visited;};
 const findAdjacent=(s,id,nest)=>{for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]){const x=nest.x+dx,y=nest.y+dy;if(x<0||x>=13||y<0||y>=9||isWall(id,x,y))continue;if(s.rooms[id].battle.enemies.some(e=>e.hp>0&&e.x===x&&e.y===y))continue;return [x,y];}throw new Error('Nest has no usable adjacent square in '+id);};
 test('Quests 8 and 9 retain their Medium designs as Hard campaign expands',()=>{
@@ -50,7 +51,7 @@ test('Medium legendary cap remains exactly 5 percent for both quests, without My
 test('existing saves acquire the sixteen new rooms without losing loot, coins or completed quests',()=>{
  const s=setup(8),p=s.players.one;p.gold=612;p.level=9;p.xp=71;p.inventory.equipment.push({id:'old-weapon',name:'Veteran Sword',rarity:'Rare',category:'Sword'});
  for(const id of Object.keys(s.rooms).filter(id=>/^q[89]r/.test(id)))delete s.rooms[id];
- ensureWorld(s);assert.equal(Object.keys(s.rooms).length,134);assert.equal(p.gold,612);assert.equal(p.level,9);assert.equal(p.xp,71);assert.equal(p.inventory.equipment.at(-1).id,'old-weapon');assert.equal(s.unlockedQuest,8);
+ ensureWorld(s);assert.equal(Object.keys(s.rooms).length,134);assert.equal(p.gold,612);assert.equal(p.level,9);assert.equal(p.xp,71);assert.equal(p.inventory.equipment.at(-1).id,'old-weapon');assert.equal(s.unlockedQuest,9);
 });
 test('Warrens nest action requires adjacent player and completed movement roll',()=>{
  const s=setup(9);enterQuest(s,'one',9,T);const nest=s.rooms.q9r1.battle.nests[0],p=s.players.one;

@@ -1,10 +1,11 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {shortestPath} from '../src/endgame-maze.mjs';
 import {freshState,ensurePlayer,claimQuestReward,effectiveStats,globalActivePlayer} from '../src/engine.mjs';
 import {createMaze,joinMaze,leaveMaze,mazeTravel,mazeSearch,mazeClaim,mazeAction,mazeReward,mazeVoteAbandon,mazePublic,mazeTick,nextMazeDeadline} from '../src/maze-play.mjs';
 const T=1762021000000;
-function session(){const s=freshState(T);ensurePlayer(s,'one','Player One');ensurePlayer(s,'two','Player Two');for(const id of ['one','two']){s.players[id].room='camp';s.players[id].gold=500;s.players[id].level=25;s.players[id].maxHp=300;s.players[id].hp=300;}s.completedQuests=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];s.unlockedQuest=15;return s;}
+function session(){const s=freshState(T);ensurePlayer(s,'one','Player One');ensurePlayer(s,'two','Player Two');for(const id of ['one','two']){s.players[id].room='camp';s.players[id].gold=500;s.players[id].level=25;s.players[id].maxHp=300;s.players[id].hp=300;}s.completedQuests=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];mirrorWorldProgress(s);grantTestTier(s,15);return s;}
 test('three-slot Maze creation, rejoin, secure seed, and no boss repetition',()=>{
  const s=session();assert.throws(()=>createMaze(s,'two',1,'seed-secret-12345',T),/host/);
  assert.throws(()=>createMaze(s,'one',4,'seed-secret-12345',T),/slot/);

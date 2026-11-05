@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -10,7 +11,7 @@ import {HARD_BLUEPRINTS} from '../src/hard-rooms.mjs';
 import {PLAYABLE_QUESTS} from '../src/campaign.mjs';
 const T=1_800_000_000_000;
 const catalog=JSON.parse(readFileSync(new URL('../public/campaign-catalog.json',import.meta.url))).quests;
-function game(q=10){const s=freshState(T);ensurePlayer(s,'one','TESTER');s.players.one.room='camp';s.unlockedQuest=q;s.completedQuests=Array.from({length:q-1},(_,i)=>i+1);return s}
+function game(q=10){const s=freshState(T);ensurePlayer(s,'one','TESTER');s.players.one.room='camp';grantTestTier(s,q);s.completedQuests=Array.from({length:q-1},(_,i)=>i+1);return s}
 function reachable(roomId){
  const w=roomSize(roomId),centre=doorRow(roomId),seen=new Set([`0,${centre}`]),queue=[[0,centre]];
  for(let i=0;i<queue.length;i++)for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){

@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,selectClass,CLASS_DATA,effectiveStats,equipItem,buyFromShop,merchantStock,claimQuestReward,rollDie,publicState} from '../src/engine.mjs';
@@ -46,7 +47,7 @@ test('Staff rarities appear in merchant from Common through Exotic without chang
  const staff=p.inventory.equipment.find(x=>x.category==='Staff');assert(staff);
  equipItem(s,'one',staff.id,'weapon',NOW);
  assert.equal(effectiveStats(p).mainRange,3);
- s.unlockedQuest=13;s.exoticMerchantOffer={sku:'staff-exotic',remaining:1};
+ grantTestTier(s,13);s.exoticMerchantOffer={sku:'staff-exotic',remaining:1};
  assert(merchantStock(s).some(x=>x.sku==='staff-exotic'));
  buyFromShop(s,'one','staff-exotic',NOW);
  assert.equal(p.inventory.equipment.at(-1).rarity,'Exotic');

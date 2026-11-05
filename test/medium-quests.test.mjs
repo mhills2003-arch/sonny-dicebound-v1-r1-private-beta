@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -27,7 +28,7 @@ test('all nine specialist roles are introduced in the original Quest 5–7 order
 });
 test('players can unlock each Medium quest sequentially without discarding earlier saved characters',()=>{
  const s=world();const p=s.players.one;p.gold=409;p.level=3;p.xp=31;
- s.completedQuests=[1,2,3,4,5,6];s.unlockedQuest=7;p.room='camp';
+ s.completedQuests=[1,2,3,4,5,6];mirrorWorldProgress(s);grantTestTier(s,7);p.room='camp';
  const r=enterQuest(s,'one',7,T);assert.equal(r.saved,'room-entry');assert.equal(p.room,'q7r1');
  assert.equal(s.rooms.q7r1.battle.status,'active');assert.equal(p.gold,409);assert.equal(p.level,3);
  assert.equal(ROOM_DATA.q7r8.foes[0].variant,'boss');
@@ -57,7 +58,7 @@ test('one potion means one use; legacy potion stacks preserve every earned use',
 });
 test('all Medium room encounters spawn their scripted roles with bounded enemy coordinates',()=>{
  for(const q of [5,6,7]){
-  const s=world();s.completedQuests=[1,2,3,4,5,6];s.unlockedQuest=7;s.players.one.room='camp';
+  const s=world();s.completedQuests=[1,2,3,4,5,6];mirrorWorldProgress(s);grantTestTier(s,7);s.players.one.room='camp';
   enterQuest(s,'one',q,T);assert.equal(s.rooms[`q${q}r1`].battle.enemies.length,ROOM_DATA[`q${q}r1`].foes.length);
   const p=s.players.one;p.lastRolledTurn=s.turn.round;p.moveRound=`global:${s.turn.round}`;p.movementRolled=true;
   for(let i=1;i<=8;i++){
@@ -147,15 +148,16 @@ test('Armoured enemy reduces incoming hits rather than gaining unrestricted HP',
  assert(regular>armoured,`normal takes ${regular}, armoured ${armoured}`);
  assert(armoured>=1);
 });
-test('Quest 5 and 6 final battles unlock exactly the next Medium quest, not future quests',()=>{
- for(const [completed,unlock] of [[5,6],[6,7]]){
-  const s=world();const p=s.players.one;s.unlockedQuest=completed;s.completedQuests=[1,2,3,4,...(completed===6?[5]:[])];
+test('Completing a Medium boss does not unlock Hard until all five Medium quests are complete',()=>{
+ for(const completed of [5,6]){
+  const s=world();const p=s.players.one;grantTestTier(s,completed);s.completedQuests=[1,2,3,4,...(completed===6?[5]:[])];
   const room=`q${completed}r8`;p.room=room;
   const b=s.rooms[room].battle;b.status='active';b.round=1;b.enemies=[en('normal',{hp:0})];
   b.actions={};b.participated={one:true};b.damageBy={one:20};
   const beforeGold=p.gold;const result=resolveRound(s,room,T,()=>.5);
   assert.equal(b.status,'cleared');assert.equal(result.saved,'boss-completed');
-  assert(s.completedQuests.includes(completed));assert.equal(s.unlockedQuest,unlock);
+  assert(s.completedQuests.includes(completed));assert.equal(s.unlockedQuest,9);
+  assert.equal(p.unlockedQuest,9);
   assert(p.gold>beforeGold);
  }
 });

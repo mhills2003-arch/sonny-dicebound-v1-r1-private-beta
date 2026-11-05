@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,selectClass,claimLoot,buyFromShop,SHOP_STOCK,merchantStock,effectiveStats,
@@ -64,7 +65,7 @@ test('tinker extra D4 is limited to bomb and meteor; not permanent character att
  assert.equal(classBombDie(p,'guardian-ward'),0);assert.equal(classBonusAttackDie(p),0);
 });
 test('maze loot respects class search probabilities with deterministic persisted per-player claim IDs',()=>{
- const {s,p}=game('warlock');s.completedQuests=Array.from({length:15},(_,i)=>i+1);p.level=25;
+ const {s,p}=game('warlock');s.completedQuests=Array.from({length:15},(_,i)=>i+1);mirrorWorldProgress(s);p.level=25;
  createMaze(s,'one',1,'perks-test-seed',T);
  const run=s.mazeRuns[1];const room=run.map.entrance;
  // Verify the maze's actual saved outcomes against its seeded value: with a
@@ -82,7 +83,7 @@ test('medium 5% Legendary chance is unchanged by Knight search bonus',()=>{
 
 test('Tinker meteor scroll in Maze uses a single server-owned charge and damages enemies',async()=>{
  const {mazeTravel,mazeAction}=await import('../src/maze-play.mjs');
- const {s,p}=game('tinker');s.completedQuests=Array.from({length:15},(_,i)=>i+1);p.level=25;p.maxHp=300;p.hp=300;
+ const {s,p}=game('tinker');s.completedQuests=Array.from({length:15},(_,i)=>i+1);mirrorWorldProgress(s);p.level=25;p.maxHp=300;p.hp=300;
  createMaze(s,'one',1,'tinker-meteor-test',T);
  const run=s.mazeRuns[1],start=run.map.rooms[run.map.entrance];
  const dir=Object.entries(start.connections).find(([,id])=>!run.map.rooms[id].hidden)?.[0];

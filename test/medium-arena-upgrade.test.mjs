@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -7,7 +8,7 @@ import {
 const T=1_800_000_000_000;
 function world(){
  const s=freshState(T);ensurePlayer(s,'one','Player 1');
- s.completedQuests=[1,2,3,4,5,6];s.unlockedQuest=7;s.players.one.room='camp';
+ s.completedQuests=[1,2,3,4,5,6];mirrorWorldProgress(s);grantTestTier(s,7);s.players.one.room='camp';
  return s;
 }
 function reachable(roomId){

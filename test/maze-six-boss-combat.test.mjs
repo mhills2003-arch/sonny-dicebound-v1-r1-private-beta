@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,publicState} from '../src/engine.mjs';
@@ -9,7 +10,7 @@ function fight(bossId,withPartner=false){
  const s=freshState(T);ensurePlayer(s,'one','One');
  if(withPartner)ensurePlayer(s,'two','Two');
  for(const p of Object.values(s.players)){p.room='camp';p.level=25;p.maxHp=10000;p.hp=10000;p.gold=500;}
- s.completedQuests=Array.from({length:15},(_,i)=>i+1);s.unlockedQuest=15;
+ s.completedQuests=Array.from({length:15},(_,i)=>i+1);mirrorWorldProgress(s);grantTestTier(s,15);
  createMaze(s,'one',1,'all-six-bosses-tested-123',T);
  const run=s.mazeRuns[1];run.map.bossId=bossId;run.map.boss=ENDGAME_BOSSES.find(x=>x.id===bossId);
  const path=shortestPath(run.map.rooms,run.map.entrance,run.map.bossRoomId),prev=path.at(-2),end=path.at(-1);

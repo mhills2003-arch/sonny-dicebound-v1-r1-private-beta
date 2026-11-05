@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -30,14 +31,14 @@ test('unspent movement is lost at End Turn and another room does not grant a rer
  const s=game(['one']);roll(s,'one',T,()=>.999);
  assert.equal(s.players.one.moveRemaining,6);move(s,'one','E',T);
  assert.equal(s.players.one.moveRemaining,5);
- s.unlockedQuest=2;enterQuest(s,'one',2,T);
+ grantTestTier(s,2);enterQuest(s,'one',2,T);
  assert.throws(()=>roll(s,'one',T),/Already rolled/);
  endTurn(s,'one',T+1,()=>0);
  assert.equal(s.players.one.moveRemaining,0);
  assert.equal(roll(s,'one',T+2,()=>0).roll,1);
 });
 test('a player in another quest still waits for the same global turn',()=>{
- const s=game();s.unlockedQuest=2;enterQuest(s,'two',2,T);
+ const s=game();grantTestTier(s,2);enterQuest(s,'two',2,T);
  const b=foe(s,'q2r1');s.players.two.x=6;s.players.two.y=3;
  assert.equal(globalActivePlayer(s),'one');
  assert.throws(()=>roll(s,'two'),/Waiting for one/i);

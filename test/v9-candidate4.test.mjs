@@ -1,10 +1,11 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,returnToCamp,enterQuest,resumeQuest,replayQuest,
  buyFromShop,sellToShop,resaleValue,publicState,ROOM_DATA,ROOM_WALLS,
  rollMovement,endTurn,claimLoot,SHOP_STOCK} from '../src/engine.mjs';
 const T=1900000500000;
-function game(ids=['one','two']){const s=freshState(T);for(const id of ids)ensurePlayer(s,id,id);s.unlockedQuest=4;return s}
+function game(ids=['one','two']){const s=freshState(T);for(const id of ids)ensurePlayer(s,id,id);grantTestTier(s,4);return s}
 function place(s,id,room,x=1,y=3){Object.assign(s.players[id],{room,x,y});s.rooms[room].battle.status='cleared';}
 function freeSquare(room,x,y){return !(ROOM_WALLS[room]||[]).some(([a,b])=>a===x&&b===y)}
 test('camp returns to original room and square without resetting battles or searched loot',()=>{
@@ -54,7 +55,7 @@ test('switching quests stores and restores separate per-quest bookmarks',()=>{
 });
 test('replaying completed quest resets its bookmarks and starts at beginning',()=>{
  const s=game(['one']);place(s,'one','q2r4',3,3);returnToCamp(s,'one',T);
- s.completedQuests.push(2);
+ s.completedQuests.push(2);mirrorWorldProgress(s);
  replayQuest(s,'one',2,T+1);
  assert.equal(s.players.one.room,'q2r1');
  assert.equal(s.players.one.questBookmarks[2].room,'q2r1');

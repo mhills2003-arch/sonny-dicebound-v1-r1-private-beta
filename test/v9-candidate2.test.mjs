@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -62,7 +63,7 @@ test('four player order follows 1 2 3 4 and a disconnected player is skipped',()
  assert.equal(activeTurnId(s,'clearing'),'one');
 });
 test('the other player can move and fight in a different quest without affecting turn order',()=>{
- const s=setupFight();s.unlockedQuest=3;
+ const s=setupFight();grantTestTier(s,3);
  // They cannot flee a fight; after a room clears they can take a different quest.
  assert.throws(()=>enterQuest(s,'two',3,T),/combat/i);
  s.rooms.clearing.battle.status='cleared';
@@ -182,7 +183,7 @@ test('2×2 enemies spawn in a west-entrance-connected component in every authore
   }
   assert(reached.size>=6,`${roomId} has no useable Large approach`);
   const s=freshState(T);ensurePlayer(s,'one','Hero');const p=s.players.one;
-  s.unlockedQuest=Math.max(s.unlockedQuest,room.quest);
+  grantTestTier(s,room.quest);
   if(roomId.endsWith('r1')){p.room='camp';enterQuest(s,'one',room.quest,T);}
   else {
    const prev=room.left;p.room=prev;p.x=roomSize(prev).width-1;p.y=doorRow(prev);

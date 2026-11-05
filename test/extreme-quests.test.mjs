@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -11,7 +12,7 @@ import {EXTREME_ENCOUNTERS} from '../src/extreme-encounters.mjs';
 import {PLAYABLE_QUESTS} from '../src/campaign.mjs';
 const T=1_800_000_000_000;
 const catalog=JSON.parse(readFileSync(new URL('../public/campaign-catalog.json',import.meta.url))).quests;
-function game(q=13){const s=freshState(T);ensurePlayer(s,'one','Tester');s.players.one.room='camp';s.unlockedQuest=q;s.completedQuests=Array.from({length:q-1},(_,i)=>i+1);return s;}
+function game(q=13){const s=freshState(T);ensurePlayer(s,'one','Tester');s.players.one.room='camp';grantTestTier(s,q);s.completedQuests=Array.from({length:q-1},(_,i)=>i+1);return s;}
 function connectedFloor(id){
  const {width,height}=roomSize(id),start=[0,doorRow(id)];
  const visited=new Set([start.join(',')]),queue=[start];
@@ -96,7 +97,7 @@ test('existing save migrates into Extreme without erasing character, inventory o
  p.inventory.equipment.push({id:'keep-the-sword',category:'Sword',rarity:'Mythic',name:'A treasured weapon'});
  for(const id of Object.keys(s.rooms).filter(id=>ROOM_DATA[id].quest>=13))delete s.rooms[id];
  s.rooms.q12r10.battle.status='cleared';s.completedQuests.push(12);ensureWorld(s);
- assert.equal(Object.keys(s.rooms).length,134);assert.equal(s.unlockedQuest,13);
+ assert.equal(Object.keys(s.rooms).length,134);assert.equal(s.unlockedQuest,15);
  assert.equal(p.gold,740);assert.equal(p.level,12);assert.equal(p.xp,81);
  assert.equal(p.inventory.equipment.at(-1).id,'keep-the-sword');
  assert.equal(s.rooms.q15r15.battle.status,'dormant');
@@ -149,5 +150,7 @@ test('quest board names, UI controls and staged unlocks include full 15-quest ch
  assert(html.includes('Quests 1–15'));assert(html.includes('lanternBtn'));
  assert(js.includes("const playable=q.number<=15"));
  const s=game(13);enterQuest(s,'one',13,T);
- assert.throws(()=>enterQuest(s,'one',14,T),/not unlocked/);
+ assert.throws(()=>enterQuest(s,'one',14,T),/combat/);
+ s.players.one.room='camp';
+ assert.equal(enterQuest(s,'one',14,T).saved,'room-entry','every Extreme quest is accessible after Hard is completed');
 });

@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,rollMovement,move,endTurn,globalActivePlayer,
@@ -29,7 +30,7 @@ test('live failure reproduction: P2 enters fight, enemies act, then P1 enters mi
 });
 
 test('entering an active battle by quest board while holding the current global turn allows an action and End Turn',()=>{
- const s=g();s.unlockedQuest=3;
+ const s=g();grantTestTier(s,3);
  s.players.two.room='q3r1';const b=s.rooms.q3r1.battle;
  b.status='active';b.round=s.turn.round;b.eligibleRound={two:1};b.participated={};b.damageBy={};b.actions={};
  b.enemies=[{id:'foe',name:'D30',faces:30,variant:'normal',x:6,y:3,hp:100,maxHp:100,armourDie:4,atk:2}];
@@ -54,7 +55,7 @@ test('old persisted next-round eligibility is repaired for current actor without
 });
 
 test('entry into an already active fight does not let a waiting player take an early global turn',()=>{
- const s=g();s.unlockedQuest=3;
+ const s=g();grantTestTier(s,3);
  s.players.one.room='q3r1';const b=s.rooms.q3r1.battle;
  b.status='active';b.round=1;b.actions={};b.eligibleRound={one:1};
  b.enemies=[{id:'foe',name:'D30',faces:30,variant:'normal',x:6,y:3,hp:100,maxHp:100,armourDie:4,atk:2}];

@@ -1,3 +1,4 @@
+import {grantTestTier,mirrorWorldProgress} from './quest-tier-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshState,ensurePlayer,move as actualMove,rollMovement,submitAction,resolveRound,tick,CLASS_DATA,ROOM_DATA,publicState,claimLoot,resetTestAdventure,LOOT_SLOTS,xpRequiredForLevel,effectiveStats,LEVEL_CAP,equipItem,unequipItem,bindEnchantment,usePotion,LAB_HEAL_FRACTION,claimTrainingRack,rollDie,RARITY_DICE,ROOM_IDS,enterQuest,ensureWorld,voteFinishQuest,buyFromShop,SHOP_STOCK,QUEST_MAX_RARITY,equipmentRarity,isWall,clearLine,endTurn,globalActivePlayer} from '../src/engine.mjs';
@@ -224,7 +225,7 @@ test('Coin of Ages is only in its exact 1/500 coin sample band and Multishot V o
  const s=game();
  const ages=claimLoot(s,'one','coin',t0,()=>1-.0002).item;
  assert.equal(ages.name,'Coin of Ages');
- s.unlockedQuest=4;enterQuest(s,'one',4,t0);s.rooms.q4r1.battle.status='cleared';
+ grantTestTier(s,4);enterQuest(s,'one',4,t0);s.rooms.q4r1.battle.status='cleared';
  const sequence=[.99,0];const multishot=claimLoot(s,'one','enchantment',t0,()=>sequence.shift()??0).item;
  assert.equal(multishot.name,'Multishot V');
  const ordinary=claimLoot(s,'two','enchantment',t0,()=>.5).item;
@@ -541,10 +542,10 @@ test('Phase 4 has exactly eighteen server-backed rooms across first four origina
 test('legacy Quest 1 success migrates as completion without wiping player items',()=>{
  const s=game();const p=s.players.one;
  p.gold=100;p.xp=37;p.inventory.equipment=[{id:'legacy',name:'Old sword',category:'Sword',rarity:'Common',level:1}];
- s.rooms.watchpost.battle.status='cleared';delete s.unlockedQuest;delete s.completedQuests;
+ s.rooms.watchpost.battle.status='cleared';delete s.unlockedQuest;delete s.completedQuests;delete s.progressionVersion;delete p.completedQuests;
  for(const id of ROOM_IDS.filter(r=>!['woodland','clearing','watchpost'].includes(r)))delete s.rooms[id];
  ensurePlayer(s,'one','Joe');
- assert.equal(s.unlockedQuest,2);assert(s.completedQuests.includes(1));
+ assert.equal(s.unlockedQuest,4);assert(s.completedQuests.includes(1));assert.equal(p.unlockedQuest,4);
  assert.equal(p.gold,100);assert.equal(p.xp,37);assert.equal(p.inventory.equipment[0].id,'legacy');
  assert(s.rooms.q4r5);
 });
@@ -552,19 +553,19 @@ test('locked quest rejected; entering an unlocked quest preserves the old world'
  const s=game();
  assert.throws(()=>enterQuest(s,'one',2,t0),/not unlocked/);
  assert.throws(()=>enterQuest(s,'one',5,t0),/not unlocked/);
- s.rooms.watchpost.battle.status='cleared';ensureWorld(s);
+ s.rooms.watchpost.battle.status='cleared';ensureWorld(s);mirrorWorldProgress(s);
  const result=enterQuest(s,'one',2,t0);
  assert.equal(result.saved,'room-entry');assert.equal(s.players.one.room,'q2r1');
  assert.equal(s.rooms.q2r1.discovered,true);assert.equal(s.rooms.clearing.battle.status,'dormant');
 });
 test('Quest 2 guaranteed shiny encounter is double HP and collision-safe',()=>{
- const s=game();s.rooms.watchpost.battle.status='cleared';enterQuest(s,'one',2,t0);
+ const s=game();s.rooms.watchpost.battle.status='cleared';grantTestTier(s,2);enterQuest(s,'one',2,t0);
  s.rooms.q2r1.battle.status='cleared';s.players.one.x=8;s.players.one.y=3;move(s,'one','E',t0);
  const enemy=s.rooms.q2r2.battle.enemies[0];assert.equal(enemy.variant,'shiny');
  assert.equal(enemy.faces,4);assert.equal(enemy.hp,8);
 });
 test('Quest 3 Large dice are true two-by-two obstacles',()=>{
- const s=game();s.unlockedQuest=3;enterQuest(s,'one',3,t0);
+ const s=game();grantTestTier(s,3);enterQuest(s,'one',3,t0);
  s.rooms.q3r1.battle.status='cleared';s.players.one.x=8;s.players.one.y=3;
  move(s,'one','E',t0);
  const b=s.rooms.q3r2.battle,e=b.enemies[0];assert.equal(e.variant,'large');assert.equal(e.hp,12);
@@ -574,7 +575,7 @@ test('Quest 3 Large dice are true two-by-two obstacles',()=>{
  assert(s.log.some(x=>/square is (occupied|blocked)/.test(x.text)));
 });
 test('Quest 4 final room has Large Shiny D4 then D12 boss before unlocking completion',()=>{
- const s=game();s.unlockedQuest=4;enterQuest(s,'one',4,t0);
+ const s=game();grantTestTier(s,4);enterQuest(s,'one',4,t0);
  // Navigate test adventure by marking previous rooms cleared, then passing east doors.
  for(let i=1;i<5;i++){
    const id=`q4r${i}`;s.rooms[id].battle.status='cleared';
@@ -591,7 +592,7 @@ test('Quest 4 final room has Large Shiny D4 then D12 boss before unlocking compl
  assert.equal(b.status,'cleared');assert(s.completedQuests.includes(4));
 });
 test('quest 2 final boss completion unlocks quest 3 without resetting progression',()=>{
- const s=game();s.unlockedQuest=2;enterQuest(s,'one',2,t0);
+ const s=game();grantTestTier(s,2);enterQuest(s,'one',2,t0);
  for(let i=1;i<5;i++){
    const id=`q2r${i}`;s.rooms[id].battle.status='cleared';
    s.players.one.x=8;s.players.one.y=3;move(s,'one','E',t0);
@@ -599,7 +600,7 @@ test('quest 2 final boss completion unlocks quest 3 without resetting progressio
  const b=s.rooms.q2r5.battle;s.players.one.gold=77;b.participated.one=true;
  for(const e of b.enemies)e.hp=0;
  resolveRound(s,'q2r5',t0+100,()=>.5);
- assert.equal(s.unlockedQuest,3);assert(s.completedQuests.includes(2));
+ assert.equal(s.unlockedQuest,4);assert(s.completedQuests.includes(2));assert.equal(s.players.one.unlockedQuest,4);
  assert.equal(s.players.one.gold,99);
 });
 test('four players are independently present in shared room tactical round',()=>{
@@ -650,7 +651,7 @@ test('range of sword special never borrows bow off-hand range',()=>{
 });
 
 test('first hero launching Quest 3 can act immediately; late joiner waits next round',()=>{
- const s=game();s.unlockedQuest=3;enterQuest(s,'one',3,t0);
+ const s=game();grantTestTier(s,3);enterQuest(s,'one',3,t0);
  const battle=s.rooms.q3r1.battle;assert.equal(battle.status,'active');
  assert.equal(battle.eligibleRound.one,1);
  enterQuest(s,'two',3,t0+10);assert.equal(battle.eligibleRound.two,2);
