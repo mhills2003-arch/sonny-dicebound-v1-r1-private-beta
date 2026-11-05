@@ -302,13 +302,13 @@ function syncUI(){if(!state||!me)return;
   for(const p of Object.values(state.players)){
     const wrap=el('div','player'+(p.id===state.me?' me':''));const pic=el('img','portrait');pic.src=paths[p.klass]||paths.knight;pic.alt=({knight:'Armoured knight',outlaw:'Outlaw scout',warlock:'Warlock arcane caster',tinker:'Tinker field inventor'}[p.klass]||'Adventurer');wrap.append(pic);
     const d=el('div','player-details');const name=el('div','player-name',p.name+(p.id===state.me?' (you)':''));d.append(name);
-    d.append(el('div','player-place',(p.connected?'● ':'○ ')+roomDef(p.room).name));
+    d.append(el('div','player-place',(p.connected?'● Online · ':'○ Offline · ')+roomDef(p.room).name));
     const bar=el('div','hpbar'),fill=el('div','hpfill');fill.style.width=Math.max(0,100*p.hp/p.maxHp)+'%';bar.append(fill);d.append(bar);
     d.append(el('div','player-stats',`${p.hp}/${p.maxHp} HP · ${({knight:'Knight',outlaw:'Outlaw',warlock:'Warlock',tinker:'Tinker'}[p.klass]||'Adventurer')}${p.hp===0?' · DOWNED':''}`));wrap.append(d);list.append(wrap);
   }
   const map=$('roomMap');map.replaceChildren();for(const id of Object.keys(state.rooms).filter(id=>roomDef(id).quest===(room.quest||1))){
     const row=el('div','roomlink'+(state.rooms[id].discovered?' seen':'')+(me.room===id?' active':''));
-    row.textContent=(state.rooms[id].discovered?'◈ ':'◇ ')+(state.rooms[id].discovered?roomDef(id).name:'Undiscovered room')+' · '+Object.values(state.players).filter(p=>p.room===id).length+' player(s)';map.append(row);
+    row.textContent=(state.rooms[id].discovered?'◈ ':'◇ ')+(state.rooms[id].discovered?roomDef(id).name:'Undiscovered room')+' · '+Object.values(state.players).filter(p=>p.connected&&p.room===id).length+' online';map.append(row);
   }
   const battleStatus=$('battleStatus');const foes=$('enemies');foes.replaceChildren();
   if(battle.status==='active'){
@@ -836,7 +836,7 @@ function render(){if(!state||!me)return;const box=canvas.getBoundingClientRect()
       ctx.fillText(lit?'🏮':'🕯️',pt.x,pt.y-(s.iso?12*s.scale:0));ctx.restore();
     }
   }
-  const actors=[...battle.enemies.filter(e=>e.hp>0).map(e=>({p:e,kind:'enemy'})),...Object.values(state.players).filter(p=>p.room===me.room).map(p=>({p,kind:p.id}))];
+  const actors=[...battle.enemies.filter(e=>e.hp>0).map(e=>({p:e,kind:'enemy'})),...Object.values(state.players).filter(p=>p.connected&&p.room===me.room).map(p=>({p,kind:p.id}))];
   if(s.iso)actors.sort((a,b)=>(a.p.x+a.p.y)-(b.p.x+b.p.y));
   for(const a of actors){
     const medium=roomSize(me.room).width>9;
@@ -1141,7 +1141,7 @@ function updateMazeUI(){
  if(isFighting&&run.boss){
   const bs=battle.bossState||{},myTile=me.mazeTile||{x:1,y:3};
   const marked=new Set((battle.warn?.tiles||[]).map(t=>t.x+','+t.y));
-  const occupants=Object.values(state.players||{}).filter(p=>p.mazeSlot===run.slot&&run.positions[p.id]===run.roomId&&p.hp>0);
+  const occupants=Object.values(state.players||{}).filter(p=>p.connected&&p.mazeSlot===run.slot&&run.positions[p.id]===run.roomId&&p.hp>0);
   for(let y=0;y<7;y++)for(let x=0;x<7;x++){
    const hero=occupants.find(p=>(p.mazeTile?.x??1)===x&&(p.mazeTile?.y??3)===y);
    const fixture=(bs.points||[]).find(t=>t.x===x&&t.y===y);
