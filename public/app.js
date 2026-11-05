@@ -6,13 +6,15 @@ import {resolveHotkey, R2_HOTKEYS} from './hotkeys.mjs';
  * All position, HP and combat outcomes are authoritative WebSocket messages.
  */
 const ROOT = new URL('.',import.meta.url).pathname.replace(/\/$/,'');
-const CLIENT_BUILD='R2.1 · CLASS PIECES FIX';
+const CLIENT_BUILD='R2.4 · MAZE QA';
+const mazeLab = new URLSearchParams(location.search).get('mazeLab')==='1';
 const $ = id => document.getElementById(id);
 const canvas = $('gameCanvas');
 const ctx=canvas.getContext('2d');
 // Visible verification: if the badge does not appear, the browser is still using old app.js.
 const betaTitle=document.querySelector('.brand small');
-if(betaTitle)betaTitle.append(document.createTextNode(' · '+CLIENT_BUILD));
+if(betaTitle)betaTitle.append(document.createTextNode(' · '+CLIENT_BUILD+(mazeLab?' · ISOLATED MAZE LAB':'')));
+if(document.getElementById('mazeLabJump'))document.getElementById('mazeLabJump').hidden=!mazeLab;
 const RES={tx:42,ty:23,zh:43}; // original DICEBOUND 3.2.1 projection
 // R2.1 resilience fix: embed the four small class PNGs in the already-loaded game module.
 // Both <img> previews and canvas tokens share these exact URIs, so a missing
@@ -188,7 +190,7 @@ function selectSeat(id,{manual=false}={}){
 function connectSeat(id){
  if(authClosed)return;
  const u=new URL(ROOT+'/api/ws',location.origin);u.protocol=location.protocol==='https:'?'wss:':'ws:';
- if(trial)u.searchParams.set('trial','balance-v9');u.searchParams.set('mode',localMode?'local':'online');
+ if(trial)u.searchParams.set('trial','balance-v9');if(mazeLab)u.searchParams.set('mazeLab','1');u.searchParams.set('mode',localMode?'local':'online');
  if(localMode)u.searchParams.set('seat',id);
  const ws=new WebSocket(u);seatSockets[id]=ws;
  if(!localMode||activeSeat===id)socket=ws;
