@@ -1257,7 +1257,7 @@ function eligibleParticipants(s,roomId){const b=s.rooms[roomId].battle;return li
 function needsAction(s,roomId){const b=s.rooms[roomId].battle;return eligibleParticipants(s,roomId).filter(p=>!b.actions[p.id])}
 // Position checks belong to the authoritative server, not just the browser UI.
 function occupied(s,roomId,x,y,ignorePlayer=null,ignoreEnemy=null){
-  const player=Object.values(s.players).find(p=>p.id!==ignorePlayer&&p.room===roomId&&p.x===x&&p.y===y);
+  const player=Object.values(s.players).find(p=>p.id!==ignorePlayer&&p.connected&&p.room===roomId&&p.x===x&&p.y===y);
   if(player||isWall(roomId,x,y)||s.rooms[roomId]?.battle?.nests?.some(n=>n.active&&n.x===x&&n.y===y))return true;
   const battle=s.rooms[roomId].battle;
   return battle.status==='active'&&battle.enemies.some(e=>e.id!==ignoreEnemy&&e.hp>0&&enemyTiles(e).some(([xx,yy])=>xx===x&&yy===y));

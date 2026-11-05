@@ -161,7 +161,7 @@ function spawnBossAdds(s,run,b,count,now){
  for(let i=0;i<amount;i++){
   const serial=++b.bossState.summons,add=bossMinion(run.map.bossId,serial,run.map.rooms[run.map.bossRoomId].depth,b.phase,b.bossState.minionScale);
   // Never spawn directly on a marked danger tile or a living player.
-  const occupied=run.positions&&Object.keys(run.positions).filter(id=>run.positions[id]===run.map.bossRoomId&&s.players[id]?.hp>0).map(id=>s.players[id].mazeTile||{x:1,y:3})||[];
+  const occupied=run.positions&&Object.keys(run.positions).filter(id=>run.positions[id]===run.map.bossRoomId&&s.players[id]?.connected&&s.players[id]?.hp>0).map(id=>s.players[id].mazeTile||{x:1,y:3})||[];
   const forbidden=[...(b.warn?.tiles||[]),...occupied,...b.enemies.filter(e=>e.hp>0).map(e=>({x:e.x,y:e.y}))];
   const free=Array.from({length:25},(_,j)=>({x:1+j%5,y:1+Math.floor(j/5)})).find(t=>!forbidden.some(x=>distance(x,t)===0));
   if(free){add.x=free.x;add.y=free.y;}
